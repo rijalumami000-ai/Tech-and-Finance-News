@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ByteIndonesia — Portal Berita Teknologi Terdepan & Terupdate</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Portal berita skala nasional khusus menyajikan informasi terkini tentang Artificial Intelligence, Gadget, Keamanan Siber, Kebijakan Digital RI, dan Tren Startup." />
+  <meta name="keywords" content="Berita Teknologi, AI Indonesia, Review HP, Keamanan Siber, IKN Tech, Startup Indonesia, ByteIndonesia" />
+  <meta name="author" content="Redaksi ByteIndonesia" />
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://byteindonesia.id/" />
+  <meta property="og:title" content="ByteIndonesia — Portal Berita Teknologi Terdepan & Terupdate" />
+  <meta property="og:description" content="Informasi terupdate dan penting soal teknologi, perkembangan digital, AI, dan inovasi nasional." />
+  <meta property="og:image" content="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80" />
+
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ByteIndonesia — News Tech Portal" />
+  <meta name="twitter:description" content="Informasi terupdate teknologi, AI, & transformasi digital Indonesia." />
+  
+  <!-- Schema.org NewsArticle JSON-LD -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "NewsMediaOrganization",
+      "name": "ByteIndonesia",
+      "url": "https://byteindonesia.id/",
+      "logo": "https://byteindonesia.id/assets/logo.png",
+      "sameAs": [
+        "https://twitter.com/byteindonesia",
+        "https://instagram.com/byteindonesia"
+      ]
+    }
+  </script>
+  <link rel="icon" type="image/png" href="/logo.png" />
+  <link rel="stylesheet" href="/src/styles/main.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Top Bar: Live Tech Index -->
+    <div class="top-bar">
+      <div class="container top-bar-content">
+        <div class="tech-ticker-container">
+          <div class="tech-ticker-label">
+            <span id="pulse-dot" style="display:inline-block; width:6px; height:6px; background:var(--accent-cyan); border-radius:50%;"></span>
+            Indeks Tekno:
+          </div>
+          <div class="tech-ticker-list" id="tech-ticker-list">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+        <div class="top-bar-right" style="display: flex; align-items: center; gap: 1rem;">
+          <span class="date-badge" id="current-date-text">Sabtu, 1 Agustus 2026</span>
+          <div class="lang-switcher" id="lang-toggle-switcher">
+            <button class="btn-lang active" data-lang="id">ID</button>
+            <button class="btn-lang" data-lang="en">EN</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Navigation Header -->
+    <header class="navbar">
+      <div class="container navbar-content">
+        <a href="#" class="brand-logo" id="logo-btn">
+          <img src="/logo.png" class="brand-logo-img" alt="ByteIndonesia Logo" style="width: 24px; height: 24px; object-fit: contain; border-radius: 4px;" />
+          <span class="logo-text">ByteIndonesia</span>
+          <span class="logo-tag">MEDIA TECH</span>
+        </a>
+
+        <!-- Search Bar -->
+        <div class="search-box">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" id="search-input" class="search-input" placeholder="Cari berita AI, gadget, kedaulatan digital..." />
+          <span class="search-kbd">/</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="nav-actions">
+          <button id="glossary-btn" class="btn-action" style="padding: 0.45rem 0.85rem; font-size: 0.8rem; background: var(--bg-tertiary);" title="Pustaka Glosarium Tekno">
+            Glosarium
+          </button>
+          <button id="specs-btn" class="btn-action" style="padding: 0.45rem 0.85rem; font-size: 0.8rem; background: var(--bg-tertiary);" title="Bandingkan Spesifikasi">
+            Bandingkan Spek
+          </button>
+          <button id="admin-cms-btn" class="btn-action" style="padding: 0.45rem 0.85rem; font-size: 0.8rem; background: var(--bg-tertiary);" title="Masuk Dasbor Redaksi CMS">
+            CMS Redaksi
+          </button>
+          <button id="theme-toggle" class="btn-icon" title="Ubah Mode Gelap/Terang" aria-label="Toggle Theme">
+            <svg id="theme-svg-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <button id="bookmarks-btn" class="btn-icon" title="Artikel Tersimpan" aria-label="Bookmarks">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+            <span class="badge-count" id="bookmark-count">0</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Breaking News Ticker Banner -->
+    <div class="breaking-banner">
+      <div class="container breaking-content">
+        <span class="breaking-badge">TERKINI</span>
+        <div class="breaking-title" id="breaking-news-title">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Layout -->
+    <main class="container">
+      <!-- Category Filter Bar -->
+      <nav class="category-bar" aria-label="Filter Kategori Berita">
+        <div class="category-scroll" id="category-container">
+          <!-- Rendered dynamically -->
+        </div>
+      </nav>
+
+      <!-- Hero Section: Featured Article & Sidebar -->
+      <section class="section-hero" id="hero-section">
+        <div class="hero-grid">
+          <!-- Main Hero Featured Article -->
+          <div id="featured-article-container">
+            <!-- Rendered by JS -->
+          </div>
+
+          <!-- Sidebar Trending -->
+          <div class="trending-sidebar">
+            <div class="sidebar-header">
+              <h2 class="sidebar-title">Populer Minggu Ini</h2>
+            </div>
+            <div id="trending-articles-container" style="display:flex; flex-direction:column; gap:1rem;">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Articles Feed Grid -->
+      <section class="section-feed">
+        <div class="section-header">
+          <h2 class="section-title" id="feed-title">Berita Terbaru</h2>
+          <span id="results-count" style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">
+            <!-- Rendered by JS -->
+          </span>
+        </div>
+
+        <div class="articles-grid" id="articles-grid">
+          <!-- Article Cards Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- Newsletter Subscription Section -->
+      <section class="newsletter-box">
+        <div class="newsletter-content">
+          <h3 class="newsletter-title">Langganan Wawasan Tekno Harian</h3>
+          <p class="newsletter-desc">Dapatkan rangkuman berita teknologi paling krusial, analisis mendalam, dan ringkasan AI langsung ke kotak masuk email Anda setiap pagi.</p>
+          <form class="newsletter-form" id="newsletter-form">
+            <input type="email" class="newsletter-input" placeholder="Masukkan alamat email Anda..." required />
+            <button type="submit" class="btn-subscribe">Berlangganan Gratis</button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <!-- Abstract Mesh Gradient Background Layers -->
+      <div class="footer-mesh-bg">
+        <div class="footer-mesh-blob-3"></div>
+      </div>
+      <div class="container" style="position: relative; z-index: 5;">
+        <div class="footer-grid">
+          <div class="footer-col-brand">
+            <a href="#" class="brand-logo" style="margin-bottom: 0.25rem;">
+              <img src="/logo.png" class="brand-logo-img" alt="ByteIndonesia Logo" style="width: 24px; height: 24px; object-fit: contain; border-radius: 4px;" />
+              <span class="logo-text" style="font-weight: 900; color: inherit;">ByteIndonesia</span>
+            </a>
+            <p class="footer-desc" style="color: #555; line-height: 1.5; font-size: 0.85rem; max-width: 260px;">
+              Jurnalisme teknologi independen nasional yang menyajikan kejelasan informasi di tengah pesatnya era transformasi digital.
+            </p>
+            <ul class="footer-social-list" style="display: flex; gap: 0.5rem; margin-top: 1rem; list-style: none;">
+              <li><a href="#" class="footer-social-item fb">f</a></li>
+              <li><a href="#" class="footer-social-item ig">ig</a></li>
+              <li><a href="#" class="footer-social-item tk">tk</a></li>
+              <li><a href="#" class="footer-social-item yt">yt</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 class="footer-links-title" id="footer-company-title" style="color: #111; font-weight: 800; margin-bottom: 1.25rem;">Company</h4>
+            <ul class="footer-links-list" style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem;">
+              <li><a href="#" id="link-about" style="color: #555; text-decoration: none;">About Us</a></li>
+              <li><a href="#" id="link-contact" style="color: #555; text-decoration: none;">Get in Touch</a></li>
+              <li><a href="#" id="link-ethics" style="color: #555; text-decoration: none;">Redactional Ethics</a></li>
+              <li><a href="#" id="link-cyber-guidelines" style="color: #555; text-decoration: none;">Cyber Media Guidelines</a></li>
+              <li><a href="#" id="link-disclaimer" style="color: #555; text-decoration: none;">Disclaimer</a></li>
+              <li><a href="#" id="link-ads" style="color: #555; text-decoration: none;">Advertising</a></li>
+              <li><a href="#" id="link-careers" style="color: #555; text-decoration: none;">Careers & Internships</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 class="footer-links-title" style="color: #111; font-weight: 800; margin-bottom: 1.25rem;">Information</h4>
+            <div style="color: #555; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.875rem; line-height: 1.5;">
+              <p>Wisma Nugra Santana Jl Jend Sudirman Kav 7-8 Jakarta Pusat</p>
+              <p>+62 812-7093-9344</p>
+              <p>redaksi@byteindonesia.id</p>
+            </div>
+          </div>
+
+          <div>
+            <!-- Avatar & Subscription container -->
+            <div class="footer-sub-container" style="position: relative; padding-top: 100px; display: flex; flex-direction: column; gap: 0.75rem; align-items: flex-start;">
+              <!-- Premium 3D style character image pointing down -->
+              <img src="/premium_3d_avatar.png" class="footer-avatar-img" alt="ByteAI 3D Character" style="position: absolute; top: -50px; left: 50%; width: 170px; height: 150px; object-fit: contain; transform: translateX(-50%);" />
+
+              <!-- Subscription bar -->
+              <form class="footer-subscribe-bar" id="footer-newsletter-form" style="display: flex; background: #fff; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; width: 100%; max-width: 320px; box-shadow: 0 4px 10px rgba(0,0,0,0.04);">
+                <input type="email" class="footer-subscribe-input" placeholder="Your Email" required style="flex: 1; border: none; background: transparent; padding: 0 1rem; font-size: 0.85rem; outline: none; height: 2.8rem;" />
+                <button type="submit" class="footer-subscribe-btn" style="width: 3.2rem; height: 2.8rem; background: #FFE082; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                  <!-- Blue paper plane SVG -->
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1565C0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+              </form>
+              <p style="font-size: 0.8rem; color: #666; line-height: 1.4; max-width: 240px; margin-top: 0.25rem;">
+                Subscribe us and get all the benefits from today.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-bottom" style="border-top: 1px solid rgba(0,0,0,0.06); padding-top: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; font-size: 0.8rem; color: #777;">
+          <p>© 2026 ByteIndonesia, All Rights Reserved. Design By ByteIndonesia</p>
+          <div style="display:flex; gap:1.25rem;">
+            <a href="#" id="link-privacy" style="color: #666; text-decoration: none;">Privasi</a>
+            <a href="#" id="link-terms" style="color: #666; text-decoration: none;">Syarat & Ketentuan</a>
+            <a href="#" id="link-sitemap" style="color: #666; text-decoration: none;">Peta Situs</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Back to Top Button -->
+      <button id="btn-back-to-top" class="btn-back-to-top" title="Kembali ke Atas" style="position: fixed; bottom: 2rem; right: 2rem; width: 2.6rem; height: 2.6rem; background: #42A5F5; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; z-index: 1000; box-shadow: 0 4px 12px rgba(66, 165, 245, 0.4); font-size: 1.1rem; font-weight: bold; transition: all 0.2s;">↑</button>
+    </footer>
+
+    <!-- Company Info Modal Overlay -->
+    <div class="modal-overlay" id="company-modal">
+      <div class="modal-container" id="company-modal-container" style="max-width: 680px;">
+        <div id="company-modal-content-body"></div>
+      </div>
+    </div>
+
+    <!-- Article Reader Modal Overlay -->
+    <div class="modal-overlay" id="reader-modal">
+      <div class="modal-container" id="reader-modal-container">
+        <div class="modal-header-bar">
+          <div class="modal-controls">
+            <span style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">Ukuran Teks:</span>
+            <div class="font-size-toggle">
+              <button class="btn-size active" data-size="normal">A</button>
+              <button class="btn-size" data-size="large" style="font-size:0.85rem;">A+</button>
+              <button class="btn-size" data-size="xlarge" style="font-size:0.95rem;">A++</button>
+            </div>
+          </div>
+          <button class="btn-close" id="modal-close-btn" aria-label="Close Reader">✕</button>
+        </div>
+
+        <div class="article-reader-body" id="modal-reader-content">
+          <!-- Rendered dynamically by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Saved Articles (Bookmarks) Drawer Modal -->
+    <div class="modal-overlay" id="bookmarks-modal">
+      <div class="modal-container" style="max-width: 600px;">
+        <div class="modal-header-bar">
+          <h3 style="font-weight:800;">Artikel Tersimpan</h3>
+          <button class="btn-close" id="bookmarks-close-btn" aria-label="Close Bookmarks">✕</button>
+        </div>
+        <div style="padding: 1.5rem;" id="bookmarks-list-container">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Glosarium Modal Overlay -->
+    <div class="modal-overlay" id="glossary-modal">
+      <div class="modal-container" id="glossary-modal-container" style="max-width: 680px;">
+        <div class="modal-header-bar">
+          <h3 style="font-weight:800;">Glosarium Istilah</h3>
+          <button class="btn-close" id="glossary-close-btn" aria-label="Close Glossary">✕</button>
+        </div>
+        <div id="glossary-content-body"></div>
+      </div>
+    </div>
+
+    <!-- Specs Comparator Modal Overlay -->
+    <div class="modal-overlay" id="specs-modal">
+      <div class="modal-container" id="specs-modal-container" style="max-width: 840px;">
+        <div class="modal-header-bar">
+          <h3 style="font-weight:800;">Pembanding Spesifikasi</h3>
+          <button class="btn-close" id="specs-close-btn" aria-label="Close Specs">✕</button>
+        </div>
+        <div id="specs-content-body"></div>
+      </div>
+    </div>
+
+    <!-- Admin CMS Modal -->
+    <div class="modal-overlay" id="admin-cms-modal">
+      <div class="modal-container" id="admin-cms-container" style="max-width: 1040px; display: flex; flex-direction: column;">
+        <!-- Rendered by AdminCMS.ts -->
+      </div>
+    </div>
+    <!-- Cookie Consent Banner -->
+    <div class="cookie-consent-banner" id="cookie-consent-banner">
+      <div class="cookie-consent-inner">
+        <div class="cookie-consent-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/>
+            <circle cx="8.5" cy="8.5" r="1" fill="currentColor"/><circle cx="10.5" cy="15.5" r="1" fill="currentColor"/><circle cx="15.5" cy="13.5" r="1" fill="currentColor"/><circle cx="7" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="10" r="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="cookie-consent-text">
+          <p id="cookie-consent-msg">Situs web kami menggunakan cookie untuk memberikan konten dan pengalaman terbaik kepada pengguna. Cookie diperlukan agar situs kami berfungsi. Dengan persetujuan Anda, cookie dapat digunakan untuk meningkatkan pengalaman pengguna, menganalisis lalu lintas situs web, mengumpulkan data kunjungan, dan untuk tujuan pemasaran.</p>
+        </div>
+        <div class="cookie-consent-actions">
+          <button class="cookie-btn cookie-btn-accept" id="cookie-accept-btn">Menerima</button>
+          <button class="cookie-btn cookie-btn-reject" id="cookie-reject-btn">Menolak</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
