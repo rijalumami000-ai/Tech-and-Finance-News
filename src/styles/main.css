@@ -248,6 +248,8 @@ button {
   gap: 1rem;
   overflow-x: auto;
   scrollbar-width: none;
+  flex: 1;
+  min-width: 0;
 }
 .tech-ticker-container::-webkit-scrollbar { display: none; }
 
