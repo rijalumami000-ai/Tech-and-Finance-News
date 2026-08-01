@@ -167,6 +167,98 @@ func generateFallbackItem(symbol string) TechIndexItem {
 			HistoricalData: history,
 		}
 		
+	case "NASDAQ":
+		history := make([]TechIndexDataPoint, 24)
+		baseVals := []float64{
+			16500, 16520, 16490, 16530, 16550, 16580, 16610, 16590,
+			16620, 16650, 16630, 16670, 16640, 16660, 16690, 16710,
+			16680, 16700, 16690, 16705, 16715, 16725, 16718, 16730.2,
+		}
+		for i := 0; i < 24; i++ {
+			hr := fmt.Sprintf("%02d:00", i)
+			history[i] = TechIndexDataPoint{
+				Time:  hr,
+				Value: baseVals[i],
+			}
+		}
+		return TechIndexItem{
+			Symbol:         "NASDAQ",
+			Name:           "NASDAQ Composite",
+			Value:          "16.730,20",
+			Change:         "+1,80%",
+			IsPositive:     true,
+			HistoricalData: history,
+		}
+		
+	case "GOTO":
+		history := make([]TechIndexDataPoint, 24)
+		baseVals := []float64{
+			50, 51, 50, 52, 51, 50, 51, 52,
+			53, 52, 51, 50, 51, 52, 53, 52,
+			51, 52, 53, 52, 51, 52, 53, 53,
+		}
+		for i := 0; i < 24; i++ {
+			hr := fmt.Sprintf("%02d:00", i)
+			history[i] = TechIndexDataPoint{
+				Time:  hr,
+				Value: baseVals[i],
+			}
+		}
+		return TechIndexItem{
+			Symbol:         "GOTO",
+			Name:           "GoTo Gojek Tokopedia",
+			Value:          "Rp 53",
+			Change:         "0,00%",
+			IsPositive:     true,
+			HistoricalData: history,
+		}
+		
+	case "ETH/IDR":
+		history := make([]TechIndexDataPoint, 24)
+		baseVals := []float64{
+			52.1, 52.0, 51.9, 52.2, 52.4, 52.6, 52.9, 52.7,
+			53.0, 53.3, 53.1, 53.4, 53.2, 53.3, 53.5, 53.6,
+			53.4, 53.5, 53.3, 53.4, 53.5, 53.6, 53.5, 53.6,
+		}
+		for i := 0; i < 24; i++ {
+			hr := fmt.Sprintf("%02d:00", i)
+			history[i] = TechIndexDataPoint{
+				Time:  hr,
+				Value: baseVals[i] * 1000000.0,
+			}
+		}
+		return TechIndexItem{
+			Symbol:         "ETH/IDR",
+			Name:           "Ethereum",
+			Value:          "Rp 53.60M",
+			Change:         "+1,20%",
+			IsPositive:     true,
+			HistoricalData: history,
+		}
+		
+	case "USD/IDR":
+		history := make([]TechIndexDataPoint, 24)
+		baseVals := []float64{
+			16210, 16215, 16200, 16220, 16225, 16230, 16240, 16235,
+			16242, 16248, 16240, 16250, 16244, 16246, 16252, 16254,
+			16248, 16250, 16249, 16251, 16253, 16255, 16252, 16254,
+		}
+		for i := 0; i < 24; i++ {
+			hr := fmt.Sprintf("%02d:00", i)
+			history[i] = TechIndexDataPoint{
+				Time:  hr,
+				Value: baseVals[i],
+			}
+		}
+		return TechIndexItem{
+			Symbol:         "USD/IDR",
+			Name:           "Kurs USD/IDR",
+			Value:          "Rp 16.254",
+			Change:         "+0,20%",
+			IsPositive:     true,
+			HistoricalData: history,
+		}
+		
 	case "AI-IDX":
 		history := make([]TechIndexDataPoint, 24)
 		baseVals := []float64{
@@ -281,8 +373,16 @@ func processYahooResult(symbol string, name string, rawSymbol string, rangeStr s
 	switch symbol {
 	case "BTC/IDR":
 		displayValue = fmt.Sprintf("Rp %.3fB", latestVal/1000000000.0)
+	case "ETH/IDR":
+		displayValue = fmt.Sprintf("Rp %.2fM", latestVal/1000000.0)
+	case "USD/IDR":
+		displayValue = fmt.Sprintf("Rp %,.0f", latestVal)
+	case "GOTO":
+		displayValue = fmt.Sprintf("Rp %,.0f", latestVal)
 	case "NVDA":
 		displayValue = fmt.Sprintf("$%.2f", latestVal)
+	case "NASDAQ":
+		displayValue = fmt.Sprintf("%,.2f", latestVal)
 	default:
 		displayValue = fmt.Sprintf("%,.2f", latestVal)
 	}
@@ -344,6 +444,34 @@ func GetTechIndexes(c *fiber.Ctx) error {
 	
 	// 5. STARTUP-RI -> (Not public, always generated via simulated random walk)
 	items = append(items, generateFallbackItem("STARTUP-RI"))
+	
+	// 6. NASDAQ -> Yahoo symbol: ^IXIC (NASDAQ Composite)
+	if item, err := processYahooResult("NASDAQ", "NASDAQ Composite", "^IXIC", "5d", "1h"); err == nil {
+		items = append(items, item)
+	} else {
+		items = append(items, generateFallbackItem("NASDAQ"))
+	}
+	
+	// 7. GOTO -> Yahoo symbol: GOTO.JK (GoTo Gojek Tokopedia)
+	if item, err := processYahooResult("GOTO", "GoTo Gojek Tokopedia", "GOTO.JK", "5d", "1h"); err == nil {
+		items = append(items, item)
+	} else {
+		items = append(items, generateFallbackItem("GOTO"))
+	}
+	
+	// 8. ETH/IDR -> Yahoo symbol: ETH-IDR (Ethereum)
+	if item, err := processYahooResult("ETH/IDR", "Ethereum", "ETH-IDR", "1d", "1h"); err == nil {
+		items = append(items, item)
+	} else {
+		items = append(items, generateFallbackItem("ETH/IDR"))
+	}
+	
+	// 9. USD/IDR -> Yahoo symbol: USDIDR=X (USD to IDR)
+	if item, err := processYahooResult("USD/IDR", "Kurs USD/IDR", "USDIDR=X", "1d", "1h"); err == nil {
+		items = append(items, item)
+	} else {
+		items = append(items, generateFallbackItem("USD/IDR"))
+	}
 	
 	// Update cache
 	cacheInstance.Data = items
