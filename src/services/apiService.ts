@@ -4,7 +4,7 @@ import { ARTICLES, TECH_INDEXES } from '../data/mockNews';
 const API_BASE_URL = 'http://localhost:8080/api/v1';
 
 export class ApiService {
-  private static isBackendAvailable = false;
+  public static isBackendAvailable = false;
 
   // Check Backend Server Health
   public static async checkBackendHealth(): Promise<boolean> {

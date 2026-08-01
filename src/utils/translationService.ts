@@ -44,7 +44,9 @@ export const UI_TRANSLATIONS = {
     ethicsCode: 'Kode Etik Redaksi',
     cyberGuidelines: 'Pedoman Media Siber',
     disclaimerText: 'Disclaimer (Penafian)',
-    adsText: 'Info Iklan'
+    adsText: 'Info Iklan',
+    chartFooter: '📊 Data real-time dari Yahoo Finance • Diperbarui setiap 5 menit',
+    chartFooterFallback: '📊 Data 24 jam terakhir • Informasi statis'
   },
   en: {
     techIndex: 'Tech Index:',
@@ -88,7 +90,9 @@ export const UI_TRANSLATIONS = {
     ethicsCode: 'Redactional Ethics',
     cyberGuidelines: 'Cyber Media Guidelines',
     disclaimerText: 'Disclaimer',
-    adsText: 'Advertising'
+    adsText: 'Advertising',
+    chartFooter: '📊 Real-time data from Yahoo Finance • Updated every 5 minutes',
+    chartFooterFallback: '📊 Last 24 hours data • Static information'
   }
 };
 

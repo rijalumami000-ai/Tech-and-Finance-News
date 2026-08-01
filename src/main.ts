@@ -304,6 +304,9 @@ function showTickerChart(item: TechIndexItem, anchorEl: HTMLElement) {
   const lowVal = Math.min(...values);
   const fmt = (v: number) => v >= 1000 ? v.toLocaleString('id-ID') : v.toFixed(2);
 
+  const isLive = ApiService.isBackendAvailable && item.symbol !== 'STARTUP-RI';
+  const footerText = isLive ? t('chartFooter') : t('chartFooterFallback');
+
   const popup = document.createElement('div');
   popup.className = 'ticker-chart-popup';
   popup.innerHTML = `
@@ -328,7 +331,7 @@ function showTickerChart(item: TechIndexItem, anchorEl: HTMLElement) {
       <div class="stat-item"><span class="stat-label">Close</span><span class="stat-val">${fmt(closeVal)}</span></div>
     </div>
     <div class="ticker-chart-footer">
-      <span>📊 Data 24 jam terakhir • Pembaruan simulasi</span>
+      <span>${footerText}</span>
     </div>
   `;
 
