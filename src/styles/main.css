@@ -275,6 +275,17 @@ button {
   align-items: center;
   gap: 0.4rem;
   font-family: var(--font-mono);
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+}
+
+.ticker-item:hover {
+  background: var(--bg-secondary);
+  border-color: var(--border-subtle);
+  transform: translateY(-1px);
 }
 
 .ticker-symbol {
@@ -2410,3 +2421,209 @@ html.lenis, html.lenis body {
     font-size: 0.62rem;
   }
 }
+
+/* ==========================================================================
+   Tech Index Interactive SVG Chart Popup
+   ========================================================================== */
+.ticker-chart-popup {
+  position: fixed;
+  top: 45px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-15px);
+  width: 90%;
+  max-width: 420px;
+  background: rgba(17, 24, 39, 0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 
+              0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: auto;
+  overflow: hidden;
+  padding: 1.25rem;
+}
+
+.ticker-chart-popup.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.ticker-chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.ticker-chart-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.ticker-chart-symbol {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+.ticker-chart-name {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.ticker-chart-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+  margin-right: 1.5rem;
+}
+
+.ticker-chart-value {
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.ticker-chart-change {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.05rem 0.35rem;
+  border-radius: 4px;
+}
+.ticker-chart-change.up {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--accent-emerald);
+}
+.ticker-chart-change.down {
+  background: rgba(244, 63, 94, 0.15);
+  color: var(--accent-rose);
+}
+
+.ticker-chart-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.2rem;
+  transition: color 0.2s ease, transform 0.2s ease;
+  margin-top: -0.25rem;
+}
+
+.ticker-chart-close:hover {
+  color: var(--text-primary);
+  transform: scale(1.1);
+}
+
+.ticker-chart-body {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 0.5rem;
+  border: 1px solid var(--border-subtle);
+  margin-bottom: 1rem;
+}
+
+.ticker-chart-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* Chart animation & effects */
+.chart-line {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawChartLine 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes drawChartLine {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.chart-dot {
+  cursor: pointer;
+  transition: opacity 0.2s ease, r 0.2s ease;
+}
+
+.chart-dot:hover {
+  opacity: 1 !important;
+  r: 5.5px;
+}
+
+.ticker-chart-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.stat-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.stat-val {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.stat-val.up {
+  color: var(--accent-emerald);
+}
+
+.stat-val.down {
+  color: var(--accent-rose);
+}
+
+.ticker-chart-footer {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-align: center;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 0.6rem;
+}
+
+/* Light theme overrides */
+[data-theme='light'] .ticker-chart-popup {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 
+              0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+}
+
+[data-theme='light'] .ticker-chart-body {
+  background: rgba(0, 0, 0, 0.02);
+}
+

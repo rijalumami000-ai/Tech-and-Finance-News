@@ -1,6 +1,6 @@
 import './styles/main.css';
 import { ARTICLES, CATEGORIES, TECH_INDEXES } from './data/mockNews';
-import type { Article, CategoryId, UserPreferences } from './types/news';
+import type { Article, CategoryId, UserPreferences, TechIndexItem } from './types/news';
 import { AdminCMS } from './components/AdminCMS';
 import { ByteAIChatbot } from './components/ByteAIChatbot';
 import { ApiService } from './services/apiService';
@@ -203,13 +203,157 @@ function updateBookmarkBadge() {
 // Render Tech Indexes Ticker
 function renderTechIndexes() {
   if (!techTickerList) return;
-  techTickerList.innerHTML = TECH_INDEXES.map(item => `
-    <div class="ticker-item">
+  techTickerList.innerHTML = TECH_INDEXES.map((item, idx) => `
+    <div class="ticker-item" data-ticker-idx="${idx}" role="button" tabindex="0" title="Klik untuk lihat grafik ${item.name}">
       <span class="ticker-symbol">${item.symbol}</span>
       <span class="ticker-val">${item.value}</span>
       <span class="ticker-change ${item.isPositive ? 'up' : 'down'}">${item.change}</span>
     </div>
   `).join('');
+
+  // Add click handlers for chart popup
+  techTickerList.addEventListener('click', (e) => {
+    const tickerEl = (e.target as HTMLElement).closest('.ticker-item') as HTMLElement;
+    if (!tickerEl) return;
+    const idx = parseInt(tickerEl.dataset.tickerIdx || '0', 10);
+    showTickerChart(TECH_INDEXES[idx], tickerEl);
+  });
+}
+
+// Generate SVG line chart from historical data
+function generateSVGChart(item: TechIndexItem): string {
+  const data = item.historicalData;
+  const W = 380, H = 160, padX = 42, padY = 20;
+  const chartW = W - padX * 2, chartH = H - padY * 2;
+
+  const values = data.map(d => d.value);
+  const minV = Math.min(...values);
+  const maxV = Math.max(...values);
+  const range = maxV - minV || 1;
+
+  // Build polyline points
+  const points = data.map((d, i) => {
+    const x = padX + (i / (data.length - 1)) * chartW;
+    const y = padY + chartH - ((d.value - minV) / range) * chartH;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+
+  // Gradient fill area
+  const areaPoints = [
+    `${padX},${padY + chartH}`,
+    ...points,
+    `${(padX + chartW).toFixed(1)},${padY + chartH}`
+  ].join(' ');
+
+  const lineColor = item.isPositive ? '#10b981' : '#f43f5e';
+  const gradId = `grad-${item.symbol.replace(/[^a-zA-Z]/g, '')}`;
+
+  // Y-axis labels (5 steps)
+  const yLabels = Array.from({ length: 5 }, (_, i) => {
+    const val = minV + (range * i) / 4;
+    const y = padY + chartH - (i / 4) * chartH;
+    const label = val >= 1000 ? val.toLocaleString('id-ID', { maximumFractionDigits: 0 }) : val.toFixed(1);
+    return `<text x="${padX - 6}" y="${y + 3}" text-anchor="end" fill="var(--text-muted)" font-size="9" font-family="var(--font-mono)">${label}</text>
+      <line x1="${padX}" y1="${y}" x2="${padX + chartW}" y2="${y}" stroke="var(--border-subtle)" stroke-width="0.5" stroke-dasharray="3,3"/>`;
+  }).join('');
+
+  // X-axis labels (every 6 hours)
+  const xLabels = [0, 6, 12, 18, 23].map(i => {
+    const x = padX + (i / (data.length - 1)) * chartW;
+    return `<text x="${x}" y="${padY + chartH + 14}" text-anchor="middle" fill="var(--text-muted)" font-size="9" font-family="var(--font-mono)">${data[i].time}</text>`;
+  }).join('');
+
+  // Hover dots
+  const dots = data.map((d, i) => {
+    const x = padX + (i / (data.length - 1)) * chartW;
+    const y = padY + chartH - ((d.value - minV) / range) * chartH;
+    const label = d.value >= 1000 ? d.value.toLocaleString('id-ID') : d.value.toFixed(2);
+    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" fill="${lineColor}" opacity="0" class="chart-dot">
+      <title>${d.time} — ${label}</title>
+    </circle>`;
+  }).join('');
+
+  return `<svg viewBox="0 0 ${W} ${H + 18}" xmlns="http://www.w3.org/2000/svg" class="ticker-chart-svg">
+    <defs>
+      <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${lineColor}" stop-opacity="0.25"/>
+        <stop offset="100%" stop-color="${lineColor}" stop-opacity="0.02"/>
+      </linearGradient>
+    </defs>
+    ${yLabels}
+    ${xLabels}
+    <polygon points="${areaPoints}" fill="url(#${gradId})"/>
+    <polyline points="${points.join(' ')}" fill="none" stroke="${lineColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chart-line"/>
+    ${dots}
+  </svg>`;
+}
+
+// Show ticker chart popup
+function showTickerChart(item: TechIndexItem, anchorEl: HTMLElement) {
+  // Remove existing popup
+  document.querySelector('.ticker-chart-popup')?.remove();
+
+  const values = item.historicalData.map(d => d.value);
+  const openVal = values[0];
+  const closeVal = values[values.length - 1];
+  const highVal = Math.max(...values);
+  const lowVal = Math.min(...values);
+  const fmt = (v: number) => v >= 1000 ? v.toLocaleString('id-ID') : v.toFixed(2);
+
+  const popup = document.createElement('div');
+  popup.className = 'ticker-chart-popup';
+  popup.innerHTML = `
+    <div class="ticker-chart-header">
+      <div class="ticker-chart-title">
+        <span class="ticker-chart-symbol">${item.symbol}</span>
+        <span class="ticker-chart-name">${item.name}</span>
+      </div>
+      <div class="ticker-chart-meta">
+        <span class="ticker-chart-value">${item.value}</span>
+        <span class="ticker-chart-change ${item.isPositive ? 'up' : 'down'}">${item.change}</span>
+      </div>
+      <button class="ticker-chart-close" aria-label="Tutup">&times;</button>
+    </div>
+    <div class="ticker-chart-body">
+      ${generateSVGChart(item)}
+    </div>
+    <div class="ticker-chart-stats">
+      <div class="stat-item"><span class="stat-label">Open</span><span class="stat-val">${fmt(openVal)}</span></div>
+      <div class="stat-item"><span class="stat-label">High</span><span class="stat-val up">${fmt(highVal)}</span></div>
+      <div class="stat-item"><span class="stat-label">Low</span><span class="stat-val down">${fmt(lowVal)}</span></div>
+      <div class="stat-item"><span class="stat-label">Close</span><span class="stat-val">${fmt(closeVal)}</span></div>
+    </div>
+    <div class="ticker-chart-footer">
+      <span>📊 Data 24 jam terakhir • Pembaruan simulasi</span>
+    </div>
+  `;
+
+  // Position relative to the top-bar
+  document.body.appendChild(popup);
+
+  // Close handlers
+  const closeBtn = popup.querySelector('.ticker-chart-close')!;
+  closeBtn.addEventListener('click', () => popup.remove());
+
+  const onClickOutside = (e: MouseEvent) => {
+    if (!popup.contains(e.target as Node) && !anchorEl.contains(e.target as Node)) {
+      popup.remove();
+      document.removeEventListener('click', onClickOutside);
+    }
+  };
+  // Delay adding outside listener to avoid immediate close
+  setTimeout(() => document.addEventListener('click', onClickOutside), 50);
+
+  const onEsc = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      popup.remove();
+      document.removeEventListener('keydown', onEsc);
+    }
+  };
+  document.addEventListener('keydown', onEsc);
+
+  // Animate in
+  requestAnimationFrame(() => popup.classList.add('show'));
 }
 
 // Render Categories Bar

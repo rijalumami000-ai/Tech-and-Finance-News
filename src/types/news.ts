@@ -34,12 +34,18 @@ export interface Article {
   content: string; // Rich HTML content
 }
 
+export interface TechIndexDataPoint {
+  time: string;   // e.g. "08:00", "09:00"
+  value: number;
+}
+
 export interface TechIndexItem {
   symbol: string;
   name: string;
   value: string;
   change: string;
   isPositive: boolean;
+  historicalData: TechIndexDataPoint[];
 }
 
 export interface UserPreferences {
