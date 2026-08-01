@@ -96,114 +96,124 @@ func fetchYahooData(symbol string, rangeStr string, intervalStr string) (*YahooC
 
 // Generate fallback items if Yahoo Finance API fails or for non-public tickers
 func generateFallbackItem(symbol string) TechIndexItem {
-	rand.Seed(time.Now().UnixNano())
-	
 	switch symbol {
 	case "IDXTECH":
-		baseVal := 7420.5 + (rand.Float64() * 40.0 - 20.0)
-		prevVal := 7246.0
-		changePercent := ((baseVal - prevVal) / prevVal) * 100.0
+		// Static values from original mock data
 		history := make([]TechIndexDataPoint, 24)
+		baseVals := []float64{
+			7245, 7230, 7218, 7240, 7260, 7275, 7310, 7295,
+			7330, 7365, 7340, 7380, 7350, 7370, 7395, 7410,
+			7385, 7400, 7390, 7405, 7415, 7425, 7418, 7420,
+		}
 		for i := 0; i < 24; i++ {
 			hr := fmt.Sprintf("%02d:00", i)
 			history[i] = TechIndexDataPoint{
 				Time:  hr,
-				Value: 7200.0 + (float64(i)*8.0 + rand.Float64()*15.0),
+				Value: baseVals[i],
 			}
 		}
 		return TechIndexItem{
 			Symbol:         "IDXTECH",
 			Name:           "Indeks Tekno RI",
-			Value:          fmt.Sprintf("%.1f", baseVal),
-			Change:         fmt.Sprintf("%+.1f%%", changePercent),
-			IsPositive:     changePercent >= 0,
+			Value:          "7.420,5",
+			Change:         "+2,40%",
+			IsPositive:     true,
 			HistoricalData: history,
 		}
 		
 	case "NVDA":
-		baseVal := 138.25 + (rand.Float64() * 4.0 - 2.0)
-		prevVal := 133.20
-		changePercent := ((baseVal - prevVal) / prevVal) * 100.0
 		history := make([]TechIndexDataPoint, 24)
+		baseVals := []float64{
+			133.2, 133.0, 132.8, 133.1, 133.5, 133.9, 134.4, 134.1,
+			134.8, 135.6, 135.2, 136.0, 135.7, 136.3, 136.8, 137.2,
+			136.9, 137.5, 137.1, 137.6, 137.9, 138.1, 138.0, 138.25,
+		}
 		for i := 0; i < 24; i++ {
 			hr := fmt.Sprintf("%02d:00", i)
 			history[i] = TechIndexDataPoint{
 				Time:  hr,
-				Value: 132.0 + (float64(i)*0.25 + rand.Float64()*0.4),
+				Value: baseVals[i],
 			}
 		}
 		return TechIndexItem{
 			Symbol:         "NVDA",
 			Name:           "NVIDIA Corp",
-			Value:          fmt.Sprintf("$%.2f", baseVal),
-			Change:         fmt.Sprintf("%+.2f%%", changePercent),
-			IsPositive:     changePercent >= 0,
+			Value:          "$138.25",
+			Change:         "+3,80%",
+			IsPositive:     true,
 			HistoricalData: history,
 		}
 		
 	case "BTC/IDR":
-		baseVal := 1085000000.0 + (rand.Float64() * 20000000.0 - 10000000.0)
-		prevVal := 1065000000.0
-		changePercent := ((baseVal - prevVal) / prevVal) * 100.0
 		history := make([]TechIndexDataPoint, 24)
+		baseVals := []float64{
+			1065, 1060, 1058, 1062, 1068, 1070, 1075, 1072,
+			1078, 1080, 1076, 1082, 1079, 1081, 1083, 1085,
+			1082, 1084, 1080, 1083, 1084, 1086, 1084, 1085,
+		}
 		for i := 0; i < 24; i++ {
 			hr := fmt.Sprintf("%02d:00", i)
 			history[i] = TechIndexDataPoint{
 				Time:  hr,
-				Value: (1060.0 + float64(i)*1.0 + rand.Float64()*3.0) * 1000000.0,
+				Value: baseVals[i] * 1000000.0,
 			}
 		}
 		return TechIndexItem{
 			Symbol:         "BTC/IDR",
 			Name:           "Bitcoin",
-			Value:          fmt.Sprintf("Rp %.3fB", baseVal/1000000000.0),
-			Change:         fmt.Sprintf("%+.2f%%", changePercent),
-			IsPositive:     changePercent >= 0,
+			Value:          "Rp 1.085B",
+			Change:         "+1,90%",
+			IsPositive:     true,
 			HistoricalData: history,
 		}
 		
 	case "AI-IDX":
-		baseVal := 4150.1 + (rand.Float64() * 30.0 - 15.0)
-		prevVal := 3986.0
-		changePercent := ((baseVal - prevVal) / prevVal) * 100.0
 		history := make([]TechIndexDataPoint, 24)
+		baseVals := []float64{
+			3985, 3970, 3960, 3980, 4005, 4020, 4050, 4035,
+			4070, 4095, 4080, 4105, 4090, 4100, 4115, 4125,
+			4110, 4130, 4120, 4135, 4140, 4148, 4145, 4150,
+		}
 		for i := 0; i < 24; i++ {
 			hr := fmt.Sprintf("%02d:00", i)
 			history[i] = TechIndexDataPoint{
 				Time:  hr,
-				Value: 3960.0 + (float64(i)*8.0 + rand.Float64()*10.0),
+				Value: baseVals[i],
 			}
 		}
 		return TechIndexItem{
 			Symbol:         "AI-IDX",
 			Name:           "Global AI Index",
-			Value:          fmt.Sprintf("%.1f", baseVal),
-			Change:         fmt.Sprintf("%+.1f%%", changePercent),
-			IsPositive:     changePercent >= 0,
+			Value:          "4.150,1",
+			Change:         "+4,10%",
+			IsPositive:     true,
 			HistoricalData: history,
 		}
 		
 	default: // STARTUP-RI
-		baseVal := 450.0 + (rand.Float64() * 6.0 - 3.0)
-		prevVal := 452.2
-		changePercent := ((baseVal - prevVal) / prevVal) * 100.0
 		history := make([]TechIndexDataPoint, 24)
+		baseVals := []float64{
+			455, 456, 457, 455, 454, 453, 452, 454,
+			453, 451, 452, 450, 451, 449, 450, 451,
+			450, 449, 450, 451, 450, 449, 450, 450,
+		}
 		for i := 0; i < 24; i++ {
 			hr := fmt.Sprintf("%02d:00", i)
 			history[i] = TechIndexDataPoint{
 				Time:  hr,
-				Value: 455.0 - (float64(i)*0.2 + rand.Float64()*0.3),
+				Value: baseVals[i],
 			}
 		}
 		return TechIndexItem{
 			Symbol:         "STARTUP-RI",
 			Name:           "Funding Vol",
-			Value:          fmt.Sprintf("$%.0fM", baseVal),
-			Change:         fmt.Sprintf("%+.2f%%", changePercent),
-			IsPositive:     changePercent >= 0,
+			Value:          "$450M",
+			Change:         "-0,50%",
+			IsPositive:     false,
 			HistoricalData: history,
 		}
 	}
+}
 }
 
 // Map Yahoo Finance data response to our TechIndexItem structure
