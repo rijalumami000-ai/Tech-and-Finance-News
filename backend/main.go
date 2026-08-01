@@ -60,6 +60,9 @@ func main() {
 	api.Put("/articles/:id", handlers.UpdateArticle)
 	api.Delete("/articles/:id", handlers.DeleteArticle)
 
+	// Financial Index Endpoint
+	api.Get("/tech-indexes", handlers.GetTechIndexes)
+
 	// AI Assistant Endpoint
 	api.Post("/ai/summarize", handlers.AISummarize)
 	api.Post("/ai/chat", handlers.ChatAI)

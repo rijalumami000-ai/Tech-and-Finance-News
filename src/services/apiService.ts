@@ -1,5 +1,5 @@
-import type { Article } from '../types/news';
-import { ARTICLES } from '../data/mockNews';
+import type { Article, TechIndexItem } from '../types/news';
+import { ARTICLES, TECH_INDEXES } from '../data/mockNews';
 
 const API_BASE_URL = 'http://localhost:8080/api/v1';
 
@@ -40,6 +40,24 @@ export class ApiService {
       }
     }
     return ARTICLES;
+  }
+
+  // Fetch Tech Indexes from Go Backend or Fallback Dataset
+  public static async getTechIndexes(): Promise<TechIndexItem[]> {
+    if (this.isBackendAvailable) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/tech-indexes`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data)) {
+            return json.data;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend Tech Indexes API failed, falling back to mock dataset.', err);
+      }
+    }
+    return TECH_INDEXES;
   }
 
   // Create Article via Go Backend

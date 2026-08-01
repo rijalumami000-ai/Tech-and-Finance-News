@@ -26,6 +26,7 @@ const CATEGORIES_EN: Record<string, string> = {
 // Default State
 let currentCategory: CategoryId = 'all';
 let searchQuery = '';
+let liveTechIndexes: TechIndexItem[] = [...TECH_INDEXES];
 
 const preferences: UserPreferences = {
   theme: (localStorage.getItem('byte_theme') as 'dark' | 'light') || 'dark',
@@ -140,6 +141,12 @@ async function init() {
   document.body.appendChild(chatbotWrapper);
   chatbot.bindEvents(chatbotWrapper);
   
+  // Async Health check & load live financial indexes
+  const isBackendLive = await ApiService.checkBackendHealth();
+  if (isBackendLive) {
+    liveTechIndexes = await ApiService.getTechIndexes();
+  }
+
   renderTechIndexes();
   renderCategories();
   renderBreakingBanner();
@@ -150,9 +157,6 @@ async function init() {
   handleHashRouting();
   setupCookieConsent();
   updateFooterLabels();
-
-  // Async Health check for Go REST API Backend
-  await ApiService.checkBackendHealth();
 }
 
 // Client-Side Hash Router (#admin, #article/art-001, #category/ai)
@@ -203,7 +207,7 @@ function updateBookmarkBadge() {
 // Render Tech Indexes Ticker
 function renderTechIndexes() {
   if (!techTickerList) return;
-  techTickerList.innerHTML = TECH_INDEXES.map((item, idx) => `
+  techTickerList.innerHTML = liveTechIndexes.map((item, idx) => `
     <div class="ticker-item" data-ticker-idx="${idx}" role="button" tabindex="0" title="Klik untuk lihat grafik ${item.name}">
       <span class="ticker-symbol">${item.symbol}</span>
       <span class="ticker-val">${item.value}</span>
@@ -216,7 +220,7 @@ function renderTechIndexes() {
     const tickerEl = (e.target as HTMLElement).closest('.ticker-item') as HTMLElement;
     if (!tickerEl) return;
     const idx = parseInt(tickerEl.dataset.tickerIdx || '0', 10);
-    showTickerChart(TECH_INDEXES[idx], tickerEl);
+    showTickerChart(liveTechIndexes[idx], tickerEl);
   });
 }
 
