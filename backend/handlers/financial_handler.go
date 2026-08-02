@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"sync"
 	"time"
@@ -305,7 +304,6 @@ func generateFallbackItem(symbol string) TechIndexItem {
 			HistoricalData: history,
 		}
 	}
-}
 }
 
 // Map Yahoo Finance data response to our TechIndexItem structure

@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/xml"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -75,11 +74,7 @@ func GetRSSFeed(c *fiber.Ctx) error {
 	var items []RSSItem
 	for _, art := range articles {
 		artUrl := fmt.Sprintf("%s/#article/%s", baseUrl, art.Slug)
-		pubTime, err := time.Parse(time.RFC3339, art.PublishedAt)
-		pubTimeStr := nowStr
-		if err == nil {
-			pubTimeStr = pubTime.Format(time.RFC1123Z)
-		}
+		pubTimeStr := art.PublishedAt.Format(time.RFC1123Z)
 
 		items = append(items, RSSItem{
 			Title:       art.Title,
@@ -87,7 +82,7 @@ func GetRSSFeed(c *fiber.Ctx) error {
 			Description: art.Subtitle,
 			PubDate:     pubTimeStr,
 			GUID:        artUrl,
-			Category:    art.Category,
+			Category:    art.CategoryID,
 			Author:      art.AuthorName,
 		})
 	}
@@ -127,10 +122,7 @@ func GetJSONFeed(c *fiber.Ctx) error {
 	var items []JSONFeedItem
 	for _, art := range articles {
 		artUrl := fmt.Sprintf("%s/#article/%s", baseUrl, art.Slug)
-		var tags []string
-		if art.Tags != "" {
-			tags = strings.Split(art.Tags, ",")
-		}
+		tags := []string{art.CategoryID}
 
 		items = append(items, JSONFeedItem{
 			ID:            art.ID,
@@ -138,7 +130,7 @@ func GetJSONFeed(c *fiber.Ctx) error {
 			Title:         art.Title,
 			Summary:       art.Subtitle,
 			ContentHTML:   art.Content,
-			DatePublished: art.PublishedAt,
+			DatePublished: art.PublishedAt.Format(time.RFC3339),
 			Image:         art.ImageURL,
 			Tags:          tags,
 		})
