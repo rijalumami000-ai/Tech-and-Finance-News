@@ -529,16 +529,16 @@ export class AdminCMS {
         </div>
       </header>
 
-      <!-- Fullscreen Body Layout Grid (Content Main vs Metadata Sidebar) -->
-      <form id="editor-fullscreen-form" style="flex: 1; display: grid; grid-template-columns: 1fr 340px; overflow: hidden;">
-        <!-- Left Main Area: Title, Toolbar, & Visual WYSIWYG Canvas -->
-        <div style="padding: 2rem 3rem; overflow-y: auto; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 1.25rem;">
+      <!-- Fullscreen Body Layout Grid (Editor Canvas vs Live Preview vs Metadata Sidebar) -->
+      <form id="editor-fullscreen-form" style="flex: 1; display: grid; grid-template-columns: 1fr 1fr 340px; overflow: hidden;">
+        <!-- Left Column: Title, Toolbar, & Visual WYSIWYG Canvas -->
+        <div style="padding: 2rem 2.5rem; overflow-y: auto; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 1.25rem;">
           <div>
-            <input type="text" id="edit-title" required value="${article ? article.title : ''}" placeholder="Masukkan Judul Berita Utama..." style="width: 100%; padding: 0.75rem 0; background: transparent; border: none; border-bottom: 2px solid var(--border-color); color: var(--text-primary); font-size: 1.85rem; font-weight: 800; font-family: var(--font-main);" />
+            <input type="text" id="edit-title" required value="${article ? article.title : ''}" placeholder="Masukkan Judul Berita Utama..." style="width: 100%; padding: 0.75rem 0; background: transparent; border: none; border-bottom: 2px solid var(--border-color); color: var(--text-primary); font-size: 1.6rem; font-weight: 800; font-family: var(--font-main);" />
           </div>
 
           <div>
-            <input type="text" id="edit-subtitle" required value="${article ? article.subtitle : ''}" placeholder="Sub-judul / Ringkasan Pengantar Berita (1-2 kalimat)..." style="width: 100%; padding: 0.6rem 0; background: transparent; border: none; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 1.1rem;" />
+            <input type="text" id="edit-subtitle" required value="${article ? article.subtitle : ''}" placeholder="Sub-judul / Ringkasan Pengantar Berita (1-2 kalimat)..." style="width: 100%; padding: 0.6rem 0; background: transparent; border: none; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 1.05rem;" />
           </div>
 
           <!-- Professional Editorial Formatting Toolbar -->
@@ -555,16 +555,16 @@ export class AdminCMS {
               <button type="button" class="btn-tb-tag" data-tag="blockquote" title="Blok Kutipan (Quote)">Kutipan</button>
               <div style="width: 1px; height: 1.2rem; background: var(--border-color); margin: 0 0.2rem;"></div>
 
-              <button type="button" class="btn-tb" data-cmd="insertUnorderedList" title="Daftar Bullet (List)">Daftar Bullet</button>
-              <button type="button" class="btn-tb" data-cmd="insertOrderedList" title="Daftar Angka">Daftar Angka</button>
+              <button type="button" class="btn-tb" data-cmd="insertUnorderedList" title="Daftar Bullet (List)">List</button>
+              <button type="button" class="btn-tb" data-cmd="insertOrderedList" title="Daftar Angka">123</button>
               <button type="button" class="btn-tb" id="btn-tb-link" title="Sisipkan Tautan (Link)">Link</button>
-              <button type="button" class="btn-tb" id="btn-tb-img" title="Sisipkan Gambar">Gambar</button>
+              <button type="button" class="btn-tb" id="btn-tb-img" title="Sisipkan Gambar">Img</button>
             </div>
 
             <!-- View Switcher Toggle: Visual WYSIWYG vs Code HTML Source -->
             <div style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-tertiary); padding: 0.15rem 0.3rem; border-radius: var(--radius-full); border: 1px solid var(--border-color);">
-              <button type="button" id="btn-mode-visual" class="btn-mode-toggle active" style="padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 700; color: #000; background: var(--accent-cyan); border: none; cursor: pointer;">Visual WYSIWYG</button>
-              <button type="button" id="btn-mode-code" class="btn-mode-toggle" style="padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 700; color: var(--text-muted); background: transparent; border: none; cursor: pointer;">HTML Code</button>
+              <button type="button" id="btn-mode-visual" class="btn-mode-toggle active" style="padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: 0.72rem; font-weight: 700; color: #000; background: var(--accent-cyan); border: none; cursor: pointer;">Visual</button>
+              <button type="button" id="btn-mode-code" class="btn-mode-toggle" style="padding: 0.25rem 0.75rem; border-radius: var(--radius-full); font-size: 0.72rem; font-weight: 700; color: var(--text-muted); background: transparent; border: none; cursor: pointer;">HTML</button>
             </div>
           </div>
 
@@ -587,8 +587,28 @@ export class AdminCMS {
               <span>Estimasi Waktu Baca: <strong id="cnt-readtime" style="color: var(--accent-emerald);">1m</strong></span>
             </div>
             <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; color: var(--accent-emerald);">
-              <span>Auto-saved ke memori lokal</span>
+              <span>Auto-saved</span>
             </div>
+          </div>
+        </div>
+
+        <!-- Middle Column: Live Reader Preview Column -->
+        <div style="padding: 2rem 2.5rem; overflow-y: auto; background: var(--bg-tertiary); display: flex; flex-direction: column; gap: 1.5rem; border-right: 1px solid var(--border-color);">
+          <div style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--accent-cyan); font-family: var(--font-mono); display: flex; align-items: center; gap: 0.4rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>Pratinjau Langsung Pembaca (Live Preview)</span>
+          </div>
+
+          <div class="reader-header" style="padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+            <div class="badge-group" style="margin-bottom: 0.75rem;">
+              <span class="tag-badge" id="preview-category-badge" style="text-transform: uppercase;">${article ? article.category.toUpperCase() : 'TEKNO'}</span>
+            </div>
+            <h1 class="reader-title" id="preview-title" style="font-size: 1.5rem; font-weight: 800; line-height: 1.3; margin-bottom: 0.75rem; color: var(--text-primary);">${article ? article.title : '[Judul Berita]'}</h1>
+            <p class="reader-subtitle" id="preview-subtitle" style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.45;">${article ? article.subtitle : '[Sub-judul berita]'}</p>
+          </div>
+
+          <div class="article-rich-content size-large" id="preview-content-body" style="font-size: 0.95rem; line-height: 1.65; color: var(--text-primary);">
+            ${initialContent}
           </div>
         </div>
 
@@ -639,6 +659,32 @@ export class AdminCMS {
     const cntChars = editorPage.querySelector('#cnt-chars') as HTMLElement;
     const cntReadtime = editorPage.querySelector('#cnt-readtime') as HTMLElement;
 
+    // Live Preview Elements
+    const previewTitle = editorPage.querySelector('#preview-title') as HTMLElement;
+    const previewSubtitle = editorPage.querySelector('#preview-subtitle') as HTMLElement;
+    const previewCategory = editorPage.querySelector('#preview-category-badge') as HTMLElement;
+    const previewBody = editorPage.querySelector('#preview-content-body') as HTMLElement;
+
+    const editTitle = editorPage.querySelector('#edit-title') as HTMLInputElement;
+    const editSubtitle = editorPage.querySelector('#edit-subtitle') as HTMLInputElement;
+    const editCategory = editorPage.querySelector('#edit-category') as HTMLSelectElement;
+
+    // Live preview sync function
+    const syncLivePreview = () => {
+      if (previewTitle && editTitle) {
+        previewTitle.textContent = editTitle.value.trim() || '[Judul Berita]';
+      }
+      if (previewSubtitle && editSubtitle) {
+        previewSubtitle.textContent = editSubtitle.value.trim() || '[Sub-judul berita]';
+      }
+      if (previewCategory && editCategory) {
+        previewCategory.textContent = editCategory.value.toUpperCase();
+      }
+      if (previewBody) {
+        previewBody.innerHTML = wysiwygCanvas.style.display !== 'none' ? wysiwygCanvas.innerHTML : rawTextarea.value;
+      }
+    };
+
     // Analytics Counter Updater
     const updateAnalytics = () => {
       const text = wysiwygCanvas.innerText || wysiwygCanvas.textContent || '';
@@ -649,9 +695,16 @@ export class AdminCMS {
       if (cntWords) cntWords.textContent = wordCount.toLocaleString('id-ID');
       if (cntChars) cntChars.textContent = charCount.toLocaleString('id-ID');
       if (cntReadtime) cntReadtime.textContent = `${readTime}m`;
+
+      syncLivePreview();
     };
 
     updateAnalytics();
+
+    // Listeners for Live Metadata Changes
+    editTitle?.addEventListener('input', syncLivePreview);
+    editSubtitle?.addEventListener('input', syncLivePreview);
+    editCategory?.addEventListener('change', syncLivePreview);
 
     // Sync Content WYSIWYG <-> Textarea
     wysiwygCanvas.addEventListener('input', () => {
