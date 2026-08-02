@@ -7,6 +7,7 @@ import { ApiService } from './services/apiService';
 import { TechGlossary } from './components/TechGlossary';
 import { SpecsComparator } from './components/SpecsComparator';
 import { CompanyModal, type CompanyPageType } from './components/CompanyModal';
+import { ReaderPoll } from './components/ReaderPoll';
 import { Toast } from './utils/toast';
 import { TranslationService, UI_TRANSLATIONS } from './utils/translationService';
 import { TextToSpeechService } from './utils/textToSpeech';
@@ -77,6 +78,7 @@ const filterToggleBtn = document.getElementById('btn-filter-toggle');
 const filterSortBy = document.getElementById('filter-sort-by') as HTMLSelectElement;
 const filterDateRange = document.getElementById('filter-date-range') as HTMLSelectElement;
 const filterTagChips = document.getElementById('filter-tag-chips');
+const pollWidgetContainer = document.getElementById('reader-poll-widget');
 
 // Company Modal Elements
 const companyModal = document.getElementById('company-modal');
@@ -164,6 +166,7 @@ async function init() {
   renderHeroSection();
   renderFeed();
   renderFilterTags();
+  renderPollWidget();
 
   setupEventListeners();
   handleHashRouting();
@@ -450,6 +453,9 @@ function renderHeroSection() {
   }
 
   // Render Sidebar Trending
+  const trendingHeader = document.getElementById('trending-title-header');
+  if (trendingHeader) trendingHeader.textContent = t('trendingTitle');
+
   if (trendingArticlesContainer) {
     const trendingArticles = ARTICLES.filter(a => a.isTrending && a.id !== featuredArticle.id).slice(0, 4);
     trendingArticlesContainer.innerHTML = trendingArticles.map((art, idx) => `
@@ -1137,6 +1143,7 @@ function setupEventListeners() {
       updateFooterLabels();
       updateFilterLabels();
       renderFilterTags();
+      renderPollWidget();
 
       Toast.show(lang === 'en' ? 'Language switched to English' : 'Bahasa diubah ke Indonesia');
     });
@@ -1282,6 +1289,16 @@ function renderFilterTags() {
       renderFilterTags();
       renderFeed();
     });
+  });
+}
+
+// Render Reader Poll Widget
+function renderPollWidget() {
+  if (!pollWidgetContainer) return;
+  pollWidgetContainer.innerHTML = ReaderPoll.renderHTML(preferences.language);
+  ReaderPoll.bindEvents(pollWidgetContainer, () => {
+    Toast.show(preferences.language === 'en' ? 'Thank you for participating in ByteIndonesia editorial poll!' : 'Terima kasih telah berpartisipasi dalam jajak pendapat ByteIndonesia!');
+    renderPollWidget();
   });
 }
 
