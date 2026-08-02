@@ -87,6 +87,9 @@
         <div class="search-box">
           <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
           <input type="text" id="search-input" class="search-input" placeholder="Cari berita AI, gadget, kedaulatan digital..." />
+          <button id="btn-filter-toggle" style="background:transparent; border:none; color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0.25rem; margin-right:0.25rem; outline:none; transition:color 0.2s;" title="Filter Lanjutan (Advanced Filter)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          </button>
           <span class="search-kbd">/</span>
         </div>
 
@@ -111,6 +114,42 @@
         </div>
       </div>
     </header>
+
+    <!-- Advanced Filter Expandable Panel -->
+    <div id="advanced-filter-panel" style="display:none; background:var(--bg-secondary); border-bottom:1px solid var(--border-color); padding:1rem 0; box-shadow:var(--shadow-md); transition:all 0.3s ease;">
+      <div class="container" style="display:flex; flex-direction:column; gap:0.75rem;">
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1.25rem;">
+          <!-- Sorting Options -->
+          <div>
+            <label style="display:block; font-size:0.72rem; font-weight:700; color:var(--accent-cyan); text-transform:uppercase; margin-bottom:0.4rem; letter-spacing:0.05em;" id="lbl-sort-by">Urutkan Berdasarkan</label>
+            <select id="filter-sort-by" style="width:100%; padding:0.5rem; background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-size:0.825rem; font-weight:600; outline:none; cursor:pointer;">
+              <option value="latest">Terbaru</option>
+              <option value="views">Terpopuler (Dilihat)</option>
+              <option value="likes">Paling Disukai</option>
+            </select>
+          </div>
+
+          <!-- Date Options -->
+          <div>
+            <label style="display:block; font-size:0.72rem; font-weight:700; color:var(--accent-cyan); text-transform:uppercase; margin-bottom:0.4rem; letter-spacing:0.05em;" id="lbl-date-range">Rentang Waktu</label>
+            <select id="filter-date-range" style="width:100%; padding:0.5rem; background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-size:0.825rem; font-weight:600; outline:none; cursor:pointer;">
+              <option value="all">Semua Waktu</option>
+              <option value="24h">24 Jam Terakhir</option>
+              <option value="week">Minggu Ini</option>
+              <option value="month">Bulan Ini</option>
+            </select>
+          </div>
+
+          <!-- Filter tags -->
+          <div>
+            <label style="display:block; font-size:0.72rem; font-weight:700; color:var(--accent-cyan); text-transform:uppercase; margin-bottom:0.4rem; letter-spacing:0.05em;" id="lbl-popular-tags">Tag Populer</label>
+            <div id="filter-tag-chips" style="display:flex; flex-wrap:wrap; gap:0.35rem; align-items:center;">
+              <!-- Javascript chips -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Breaking News Ticker Banner -->
     <div class="breaking-banner">

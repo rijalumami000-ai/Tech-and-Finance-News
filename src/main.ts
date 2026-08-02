@@ -29,6 +29,9 @@ let currentCategory: CategoryId = 'all';
 let searchQuery = '';
 let liveTechIndexes: TechIndexItem[] = [...TECH_INDEXES];
 let currentArticleSpeechText = '';
+let selectedFilterSortBy = 'latest';
+let selectedFilterDateRange = 'all';
+let selectedFilterTag = '';
 
 const preferences: UserPreferences = {
   theme: (localStorage.getItem('byte_theme') as 'dark' | 'light') || 'dark',
@@ -68,6 +71,12 @@ const newsletterForm = document.getElementById('newsletter-form');
 const adminCmsBtn = document.getElementById('admin-cms-btn');
 const adminCmsModal = document.getElementById('admin-cms-modal');
 const adminCmsContainer = document.getElementById('admin-cms-container');
+
+const filterPanel = document.getElementById('advanced-filter-panel');
+const filterToggleBtn = document.getElementById('btn-filter-toggle');
+const filterSortBy = document.getElementById('filter-sort-by') as HTMLSelectElement;
+const filterDateRange = document.getElementById('filter-date-range') as HTMLSelectElement;
+const filterTagChips = document.getElementById('filter-tag-chips');
 
 // Company Modal Elements
 const companyModal = document.getElementById('company-modal');
@@ -154,11 +163,13 @@ async function init() {
   renderBreakingBanner();
   renderHeroSection();
   renderFeed();
+  renderFilterTags();
 
   setupEventListeners();
   handleHashRouting();
   setupCookieConsent();
   updateFooterLabels();
+  updateFilterLabels();
 }
 
 // Client-Side Hash Router (#admin, #article/art-001, #category/ai)
@@ -467,7 +478,6 @@ function renderHeroSection() {
   }
 }
 
-// Render Articles Grid Feed
 function renderFeed() {
   if (!articlesGrid) return;
 
@@ -478,8 +488,33 @@ function renderFeed() {
       art.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       art.subtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
       art.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    return matchesCategory && matchesSearch;
+
+    const matchesDate = (() => {
+      if (selectedFilterDateRange === 'all') return true;
+      const pubTime = new Date(art.publishedAt).getTime();
+      const now = Date.now();
+      const diff = now - pubTime;
+      if (selectedFilterDateRange === '24h') return diff <= 24 * 60 * 60 * 1000;
+      if (selectedFilterDateRange === 'week') return diff <= 7 * 24 * 60 * 60 * 1000;
+      if (selectedFilterDateRange === 'month') return diff <= 30 * 24 * 60 * 60 * 1000;
+      return true;
+    })();
+
+    const matchesTag = selectedFilterTag === '' || art.tags.some(t => t.toLowerCase() === selectedFilterTag.toLowerCase());
+
+    return matchesCategory && matchesSearch && matchesDate && matchesTag;
+  });
+
+  // Sort Articles
+  filtered.sort((a, b) => {
+    if (selectedFilterSortBy === 'views') {
+      return b.viewsCount - a.viewsCount;
+    }
+    if (selectedFilterSortBy === 'likes') {
+      return b.likesCount - a.likesCount;
+    }
+    // default 'latest'
+    return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
   });
 
   // Update Title & Count
@@ -952,6 +987,25 @@ function setupEventListeners() {
     renderFeed();
   });
 
+  // Advanced Filter Panel Toggle & Select Listeners
+  filterToggleBtn?.addEventListener('click', () => {
+    if (filterPanel) {
+      const isHidden = filterPanel.style.display === 'none';
+      filterPanel.style.display = isHidden ? 'block' : 'none';
+      (filterToggleBtn as HTMLElement).style.color = isHidden ? 'var(--accent-cyan)' : 'var(--text-secondary)';
+    }
+  });
+
+  filterSortBy?.addEventListener('change', () => {
+    selectedFilterSortBy = filterSortBy.value;
+    renderFeed();
+  });
+
+  filterDateRange?.addEventListener('change', () => {
+    selectedFilterDateRange = filterDateRange.value;
+    renderFeed();
+  });
+
   // Keyboard shortcut '/' to focus search & 'Escape' to close reader/audio
   window.addEventListener('keydown', (e) => {
     if (e.key === '/' && document.activeElement !== searchInput) {
@@ -1081,6 +1135,8 @@ function setupEventListeners() {
       renderHeroSection();
       renderFeed();
       updateFooterLabels();
+      updateFilterLabels();
+      renderFilterTags();
 
       Toast.show(lang === 'en' ? 'Language switched to English' : 'Bahasa diubah ke Indonesia');
     });
@@ -1134,6 +1190,30 @@ function updateFooterLabels() {
   if (linkCareers) linkCareers.textContent = t('careersText');
 }
 
+// Update labels & option text for Advanced Filter Panel
+function updateFilterLabels() {
+  const lblSortBy = document.getElementById('lbl-sort-by');
+  const lblDateRange = document.getElementById('lbl-date-range');
+  const lblPopularTags = document.getElementById('lbl-popular-tags');
+
+  if (lblSortBy) lblSortBy.textContent = t('lblSortBy');
+  if (lblDateRange) lblDateRange.textContent = t('lblDateRange');
+  if (lblPopularTags) lblPopularTags.textContent = t('lblPopularTags');
+
+  if (filterSortBy) {
+    filterSortBy.options[0].text = t('optLatest');
+    filterSortBy.options[1].text = t('optViews');
+    filterSortBy.options[2].text = t('optLikes');
+  }
+
+  if (filterDateRange) {
+    filterDateRange.options[0].text = t('optAllTime');
+    filterDateRange.options[1].text = t('optLast24h');
+    filterDateRange.options[2].text = t('optThisWeek');
+    filterDateRange.options[3].text = t('optThisMonth');
+  }
+}
+
 // Cookie Consent Banner setup
 function updateCookieBannerLabels() {
   const bannerMsg = document.getElementById('cookie-consent-msg');
@@ -1172,6 +1252,36 @@ function setupCookieConsent() {
     localStorage.setItem('byte_cookie_consent', 'rejected');
     banner.classList.remove('show');
     Toast.show(t('cookieToastReject'));
+  });
+}
+
+// Render dynamic tag chips for Advanced Filter Panel
+function renderFilterTags() {
+  if (!filterTagChips) return;
+  const tagsSet = new Set<string>();
+  ARTICLES.forEach(art => art.tags.forEach(t => tagsSet.add(t)));
+  const uniqueTags = Array.from(tagsSet).slice(0, 6);
+
+  filterTagChips.innerHTML = uniqueTags.map(tag => {
+    const isActive = selectedFilterTag.toLowerCase() === tag.toLowerCase();
+    return `
+      <span class="tag-chip ${isActive ? 'active' : ''}" data-tag="${tag}" style="cursor:pointer; padding:0.25rem 0.6rem; border-radius:100px; font-size:0.7rem; font-weight:700; border:1px solid var(--border-color); background:${isActive ? 'var(--accent-cyan)' : 'var(--bg-tertiary)'}; color:${isActive ? '#000' : 'var(--text-secondary)'}; transition:all 0.2s ease;">
+        #${tag}
+      </span>
+    `;
+  }).join('');
+
+  filterTagChips.querySelectorAll('.tag-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const tag = chip.getAttribute('data-tag') || '';
+      if (selectedFilterTag.toLowerCase() === tag.toLowerCase()) {
+        selectedFilterTag = '';
+      } else {
+        selectedFilterTag = tag;
+      }
+      renderFilterTags();
+      renderFeed();
+    });
   });
 }
 
