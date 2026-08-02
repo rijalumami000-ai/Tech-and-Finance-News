@@ -76,4 +76,26 @@ export class ApiService {
     }
     return false;
   }
+
+  // Ask ByteAI Assistant (RAG Chatbot)
+  public static async askByteAI(message: string): Promise<string> {
+    if (this.isBackendAvailable) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/ai/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.reply) {
+            return json.reply;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend ByteAI chat API failed, falling back to local fallback.', err);
+      }
+    }
+    return '';
+  }
 }

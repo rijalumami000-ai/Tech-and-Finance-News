@@ -1,4 +1,5 @@
 import { ARTICLES } from '../data/mockNews';
+import { ApiService } from '../services/apiService';
 
 export class ByteAIChatbot {
   private isOpen: boolean = false;
@@ -63,7 +64,10 @@ export class ByteAIChatbot {
             ? 'background: var(--gradient-brand); color: #000; font-weight: 600; border-bottom-right-radius: 2px;'
             : 'background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); border-bottom-left-radius: 2px;'
         }">
-          ${msg.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}
+          ${msg.text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="chat-link" style="color:var(--accent-cyan); text-decoration:underline; font-weight:700;">$1</a>')
+          }
         </div>
       </div>
     `).join('');
@@ -121,39 +125,43 @@ export class ByteAIChatbot {
       messagesBox.scrollTop = messagesBox.scrollHeight;
     };
 
-    // Retrieve Vite environment variable VITE_GEMINI_API_KEY
-    const apiKey = (import.meta as any).env.VITE_GEMINI_API_KEY || '';
-
-    if (apiKey) {
-      // Direct call to Google Gemini Pro API from browser side
-      fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `Kamu adalah ByteAI Assistant, jurnalis AI dari media teknologi ByteIndonesia. Jawablah pertanyaan pembaca secara informatif, terpercaya, dan ringkas: \n\n${query}`
-            }]
-          }]
-        })
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
-            finalizeResponse(data.candidates[0].content.parts[0].text);
-          } else {
+    // Ask Go Backend (RAG DB + Gemini Proxy)
+    ApiService.askByteAI(query).then(backendReply => {
+      if (backendReply) {
+        finalizeResponse(backendReply);
+      } else {
+        // Fallback to client-side API call or Local Fallback
+        const apiKey = (import.meta as any).env.VITE_GEMINI_API_KEY || '';
+        if (apiKey) {
+          fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [{
+                  text: `Kamu adalah ByteAI Assistant, jurnalis AI dari media teknologi ByteIndonesia. Jawablah pertanyaan pembaca secara informatif, terpercaya, dan ringkas: \n\n${query}`
+                }]
+              }]
+            })
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
+                finalizeResponse(data.candidates[0].content.parts[0].text);
+              } else {
+                finalizeResponse(this.getLocalFallbackResponse(query));
+              }
+            })
+            .catch(() => {
+              finalizeResponse(this.getLocalFallbackResponse(query));
+            });
+        } else {
+          setTimeout(() => {
             finalizeResponse(this.getLocalFallbackResponse(query));
-          }
-        })
-        .catch(() => {
-          finalizeResponse(this.getLocalFallbackResponse(query));
-        });
-    } else {
-      // Offline RAG Semantic Simulation
-      setTimeout(() => {
-        finalizeResponse(this.getLocalFallbackResponse(query));
-      }, 500);
-    }
+          }, 500);
+        }
+      }
+    });
   }
 
   private getLocalFallbackResponse(query: string): string {

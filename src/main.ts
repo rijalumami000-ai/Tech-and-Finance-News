@@ -562,7 +562,7 @@ function renderFeed() {
 
 // Open Article Reader Modal
 function openArticleReader(articleId: string) {
-  const article = ARTICLES.find(a => a.id === articleId);
+  const article = ARTICLES.find(a => a.id === articleId || a.slug === articleId);
   if (!article || !readerModal || !modalReaderContent) return;
 
   const isLiked = preferences.likedArticleIds.includes(article.id);

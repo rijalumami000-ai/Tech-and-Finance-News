@@ -3,9 +3,11 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -47,6 +49,14 @@ type GeminiResponse struct {
 	Candidates []GeminiCandidate `json:"candidates"`
 }
 
+// stripHTML removes HTML tags and sanitizes plain text for Gemini API prompt context
+func stripHTML(html string) string {
+	re := regexp.MustCompile("<[^>]*>")
+	plain := re.ReplaceAllString(html, "")
+	spaceRe := regexp.MustCompile(`\s+`)
+	return spaceRe.ReplaceAllString(plain, " ")
+}
+
 // ChatAI handles live RAG AI query on ByteIndonesia database with real backend Gemini integration
 func ChatAI(c *fiber.Ctx) error {
 	var req ChatRequest
@@ -57,11 +67,37 @@ func ChatAI(c *fiber.Ctx) error {
 		})
 	}
 
+	userMsg := strings.ToLower(req.Message)
+	var articles []models.Article
+	db := database.DB
+
+	// 1. Retrieve RAG context: Search database for relevant articles
+	if db != nil {
+		db.Where("LOWER(title) LIKE ? OR LOWER(content) LIKE ? OR LOWER(subtitle) LIKE ?", "%"+userMsg+"%", "%"+userMsg+"%", "%"+userMsg+"%").Limit(3).Find(&articles)
+	}
+
 	apiKey := os.Getenv("GEMINI_API_KEY")
 	if apiKey != "" {
-		// Send prompt to Google Gemini API
-		prompt := "Kamu adalah ByteAI Assistant, jurnalis AI dari media teknologi ByteIndonesia. Jawablah pertanyaan pembaca secara informatif, terpercaya, dan ringkas: \n\n" + req.Message
-		
+		// Build RAG context block
+		var contextBuilder strings.Builder
+		if len(articles) > 0 {
+			contextBuilder.WriteString("Berikut adalah beberapa artikel berita dari database ByteIndonesia yang sangat relevan:\n\n")
+			for _, art := range articles {
+				contextBuilder.WriteString(fmt.Sprintf("--- \nJudul: %s\nSubtitle: %s\nIsi Ringkas: %s\nSlug: %s\n---\n\n", art.Title, art.Subtitle, stripHTML(art.Content), art.Slug))
+			}
+		}
+
+		// Prompt construction telling Gemini to cite articles using standard format: [Title](#article/slug)
+		prompt := "Kamu adalah ByteAI Assistant, jurnalis AI dari media teknologi ByteIndonesia. Jawablah pertanyaan pembaca secara informatif, terpercaya, dan ringkas.\n"
+		if contextBuilder.Len() > 0 {
+			prompt += "Kamu harus memprioritaskan dan menggunakan data dari database artikel ByteIndonesia di bawah ini untuk menjawab. Jika informasi tidak ada di artikel, kamu boleh menjawab menggunakan pengetahuan umummu, tetapi prioritaskan data dari artikel.\n"
+			prompt += "Kewajiban Penting: Jika kamu merujuk atau mengutip artikel berita di bawah, kamu wajib menyertakan link rujukan ke halaman artikel tersebut dengan format markdown persis seperti ini: [Judul Artikel](#article/slug-artikel) agar pembaca dapat membacanya langsung.\n\n"
+			prompt += "DATABASE ARTIKEL:\n" + contextBuilder.String()
+		} else {
+			prompt += "Gunakan pengetahuan umummu tentang teknologi untuk menjawab secara ringkas karena tidak ditemukan artikel terkait di database kami saat ini.\n\n"
+		}
+		prompt += "Pertanyaan Pembaca:\n" + req.Message
+
 		geminiReq := GeminiRequest{
 			Contents: []GeminiContent{
 				{
@@ -92,19 +128,11 @@ func ChatAI(c *fiber.Ctx) error {
 		}
 	}
 
-	// Fallback to local semantic RAG if API Key is not set or request fails
-	userMsg := strings.ToLower(req.Message)
-	var articles []models.Article
-	db := database.DB
-
-	if db != nil {
-		db.Where("LOWER(title) LIKE ? OR LOWER(content) LIKE ?", "%"+userMsg+"%", "%"+userMsg+"%").Find(&articles)
-	}
-
+	// Fallback to local semantic offline RAG response
 	var reply string
 	if len(articles) > 0 {
 		art := articles[0]
-		reply = "Berdasarkan rilis berita resmi **ByteIndonesia**:\n\n**" + art.Title + "**\n\n" + art.Subtitle + "\n\nRedaksi mengonfirmasi bahwa perkembangan ini terus dipantau secara langsung oleh tim jurnalis kami."
+		reply = "Berdasarkan rilis berita resmi **ByteIndonesia**:\n\n**[" + art.Title + "](#article/" + art.Slug + ")**\n\n" + art.Subtitle + "\n\nRedaksi mengonfirmasi bahwa perkembangan ini terus dipantau secara langsung oleh tim jurnalis kami."
 	} else {
 		if strings.Contains(userMsg, "ikn") || strings.Contains(userMsg, "superkomputer") {
 			reply = "Superkomputer AI **Ganesha-1** berkapasitas 100 Petaflops di Pusat Data Nasional (PDN) IKN kini telah aktif sepenuhnya untuk riset LLM Bahasa Indonesia."
