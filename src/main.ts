@@ -6,8 +6,9 @@ import { ByteAIChatbot } from './components/ByteAIChatbot';
 import { ApiService } from './services/apiService';
 import { TechGlossary } from './components/TechGlossary';
 import { SpecsComparator } from './components/SpecsComparator';
-import { CompanyModal, type CompanyPageType } from './components/CompanyModal';
+import { InstitutionalPages, type InstitutionalPageId } from './components/InstitutionalPages';
 import { ReaderPoll } from './components/ReaderPoll';
+import { ByteShorts } from './components/ByteShorts';
 import { Toast } from './utils/toast';
 import { TranslationService, UI_TRANSLATIONS } from './utils/translationService';
 import { TextToSpeechService } from './utils/textToSpeech';
@@ -79,10 +80,11 @@ const filterSortBy = document.getElementById('filter-sort-by') as HTMLSelectElem
 const filterDateRange = document.getElementById('filter-date-range') as HTMLSelectElement;
 const filterTagChips = document.getElementById('filter-tag-chips');
 const pollWidgetContainer = document.getElementById('reader-poll-widget');
+const byteShortsContainer = document.getElementById('byteshorts-bar-container');
 
-// Company Modal Elements
-const companyModal = document.getElementById('company-modal');
-const companyModalBody = document.getElementById('company-modal-content-body');
+// Institutional Pages Container
+const institutionalPageContainer = document.getElementById('institutional-page-container');
+const mainContent = document.querySelector('main.container') as HTMLElement | null;
 
 // New Modals for Glossary & Specs
 const glossaryBtn = document.getElementById('glossary-btn');
@@ -116,7 +118,6 @@ async function init() {
   const modalLenisInstances: Lenis[] = [];
   const modalConfigs = [
     { wrapperId: 'reader-modal', contentId: 'reader-modal-container' },
-    { wrapperId: 'company-modal', contentId: 'company-modal-container' },
     { wrapperId: 'bookmarks-modal', contentSelector: '#bookmarks-modal .modal-container' },
     { wrapperId: 'glossary-modal', contentId: 'glossary-modal-container' },
     { wrapperId: 'specs-modal', contentId: 'specs-modal-container' },
@@ -167,6 +168,7 @@ async function init() {
   renderFeed();
   renderFilterTags();
   renderPollWidget();
+  renderByteShorts();
 
   setupEventListeners();
   handleHashRouting();
@@ -175,22 +177,31 @@ async function init() {
   updateFilterLabels();
 }
 
-// Client-Side Hash Router (#admin, #article/art-001, #category/ai)
+// Client-Side Hash Router (#admin, #article/art-001, #category/ai, #page/tentang-kami)
 function handleHashRouting() {
   const hash = window.location.hash;
 
   if (hash.startsWith('#admin')) {
+    closeInstitutionalPage();
     openAdminCMSModal();
   } else if (hash.startsWith('#article/')) {
+    closeInstitutionalPage();
     const artId = hash.replace('#article/', '');
     openArticleReader(artId);
   } else if (hash.startsWith('#category/')) {
+    closeInstitutionalPage();
     const catId = hash.replace('#category/', '') as CategoryId;
     currentCategory = catId;
     renderCategories();
     renderFeed();
+  } else if (hash.startsWith('#page/')) {
+    const pageId = hash.replace('#page/', '');
+    if (InstitutionalPages.isValidPageId(pageId)) {
+      openInstitutionalPage(pageId);
+    }
   } else {
     // Default home
+    closeInstitutionalPage();
     if (adminCmsModal) adminCmsModal.classList.remove('open');
     if (readerModal) readerModal.classList.remove('open');
     document.body.style.overflow = '';
@@ -971,15 +982,47 @@ function openAdminCMSModal() {
   });
 }
 
-// Open Company Info Modal
-function openCompanyModal(type: CompanyPageType) {
-  if (!companyModal || !companyModalBody) return;
-  companyModalBody.innerHTML = CompanyModal.renderCompanyModalHTML(type);
-  companyModal.classList.add('open');
+// Open Institutional Full-Page
+function openInstitutionalPage(pageId: InstitutionalPageId) {
+  if (!institutionalPageContainer || !mainContent) return;
 
-  companyModalBody.querySelector('#company-modal-close')?.addEventListener('click', () => {
-    companyModal.classList.remove('open');
+  // Hide main feed content
+  mainContent.style.display = 'none';
+
+  // Render and show institutional page
+  institutionalPageContainer.innerHTML = InstitutionalPages.renderPage(pageId, preferences.language);
+  institutionalPageContainer.style.display = 'block';
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Bind back button
+  institutionalPageContainer.querySelectorAll('.inst-back-btn, nav a[href="#"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.hash = '';
+      closeInstitutionalPage();
+    });
   });
+
+  // Bind contact form if present
+  const contactForm = institutionalPageContainer.querySelector('#institutional-contact-form');
+  if (contactForm) {
+    contactForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      Toast.show(preferences.language === 'en' ? 'Your message has been sent! Our team will respond within 2 business days.' : 'Pesan Anda telah terkirim! Tim kami akan merespons dalam 2 hari kerja.');
+    });
+  }
+}
+
+// Close Institutional Page — show main content again
+function closeInstitutionalPage() {
+  if (!institutionalPageContainer || !mainContent) return;
+  if (institutionalPageContainer.style.display === 'none') return; // already closed
+
+  institutionalPageContainer.style.display = 'none';
+  institutionalPageContainer.innerHTML = '';
+  mainContent.style.display = '';
 }
 
 // Open Glossary Modal
@@ -1023,17 +1066,8 @@ function setupEventListeners() {
     applyTheme(newTheme);
   });
 
-  // Footer Company Link Event Listeners
-  document.getElementById('link-about')?.addEventListener('click', (e) => { e.preventDefault(); openCompanyModal('about'); });
-  document.getElementById('link-ethics')?.addEventListener('click', (e) => { e.preventDefault(); openCompanyModal('ethics'); });
-  document.getElementById('link-careers')?.addEventListener('click', (e) => { e.preventDefault(); openCompanyModal('careers'); });
-  document.getElementById('link-ads')?.addEventListener('click', (e) => { e.preventDefault(); openCompanyModal('ads'); });
-  document.getElementById('link-contact')?.addEventListener('click', (e) => { e.preventDefault(); openCompanyModal('contact'); });
-  document.getElementById('link-disclaimer')?.addEventListener('click', (e) => { e.preventDefault(); openCompanyModal('disclaimer'); });
-  document.getElementById('link-cyber-guidelines')?.addEventListener('click', (e) => { e.preventDefault(); openCompanyModal('cyber-guidelines'); });
 
-  document.getElementById('link-privacy')?.addEventListener('click', (e) => { e.preventDefault(); openCompanyModal('privacy'); });
-  document.getElementById('link-terms')?.addEventListener('click', (e) => { e.preventDefault(); openCompanyModal('terms'); });
+  // Footer links now use hash routes (#page/xxx) — no manual event listeners needed
   document.getElementById('link-sitemap')?.addEventListener('click', (e) => { e.preventDefault(); Toast.show(preferences.language === 'en' ? 'ByteIndonesia Sitemap 2026.' : 'Peta Situs ByteIndonesia 2026.'); });
 
   // Glossary & Specs Buttons
@@ -1101,9 +1135,6 @@ function setupEventListeners() {
   });
 
   // Close modals on clicking overlay
-  companyModal?.addEventListener('click', (e) => {
-    if (e.target === companyModal) companyModal.classList.remove('open');
-  });
 
   readerModal?.addEventListener('click', (e) => {
     if (e.target === readerModal) {
@@ -1211,6 +1242,7 @@ function setupEventListeners() {
       updateFilterLabels();
       renderFilterTags();
       renderPollWidget();
+      renderByteShorts();
 
       Toast.show(lang === 'en' ? 'Language switched to English' : 'Bahasa diubah ke Indonesia');
     });
@@ -1248,6 +1280,7 @@ function updateFooterLabels() {
   const companyTitle = document.getElementById('footer-company-title');
   const linkAbout = document.getElementById('link-about');
   const linkContact = document.getElementById('link-contact');
+  const linkRedaksi = document.getElementById('link-redaksi');
   const linkEthics = document.getElementById('link-ethics');
   const linkCyber = document.getElementById('link-cyber-guidelines');
   const linkDisclaimer = document.getElementById('link-disclaimer');
@@ -1257,6 +1290,7 @@ function updateFooterLabels() {
   if (companyTitle) companyTitle.textContent = t('companyText');
   if (linkAbout) linkAbout.textContent = t('aboutUs');
   if (linkContact) linkContact.textContent = t('getInTouch');
+  if (linkRedaksi) linkRedaksi.textContent = t('redaksiText');
   if (linkEthics) linkEthics.textContent = t('ethicsCode');
   if (linkCyber) linkCyber.textContent = t('cyberGuidelines');
   if (linkDisclaimer) linkDisclaimer.textContent = t('disclaimerText');
@@ -1366,6 +1400,19 @@ function renderPollWidget() {
   ReaderPoll.bindEvents(pollWidgetContainer, () => {
     Toast.show(preferences.language === 'en' ? 'Thank you for participating in ByteIndonesia editorial poll!' : 'Terima kasih telah berpartisipasi dalam jajak pendapat ByteIndonesia!');
     renderPollWidget();
+  });
+}
+
+// Render ByteShorts Visual Stories Bar
+function renderByteShorts() {
+  if (!byteShortsContainer) return;
+  byteShortsContainer.innerHTML = ByteShorts.renderBarHTML(preferences.language);
+  ByteShorts.bindBarEvents(byteShortsContainer, preferences.language, (articleId: string) => {
+    // Navigate to article when user clicks "Read Full Story" inside the viewer
+    const article = ARTICLES.find(a => a.id === articleId);
+    if (article) {
+      window.location.hash = `article/${article.slug || article.id}`;
+    }
   });
 }
 
