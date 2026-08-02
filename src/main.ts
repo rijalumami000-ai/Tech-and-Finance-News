@@ -620,9 +620,16 @@ function openArticleReader(articleId: string) {
   const initialDurationStr = TextToSpeechService.formatTime(Math.ceil(totalWords / 2.2));
 
   modalReaderContent.innerHTML = `
+    <!-- Sticky Reading Progress Bar -->
+    <div style="position:sticky; top:-2.5rem; left:0; right:0; height:4px; background:var(--bg-secondary); z-index:90; margin:-2.5rem -2.5rem 1.5rem -2.5rem; overflow:hidden;">
+      <div id="reader-progress-bar" style="height:100%; width:0%; background:var(--gradient-brand); transition:width 0.1s linear;"></div>
+    </div>
+
     <div class="reader-header">
       <div class="badge-group">
         <span class="tag-badge">${article.category.toUpperCase()}</span>
+        ${article.isFactChecked ? `<span class="tag-badge" style="background:rgba(16,185,129,0.15); color:var(--accent-emerald); border-color:var(--accent-emerald);">✓ VERIFIED FACT-CHECK</span>` : ''}
+        ${article.isSponsored ? `<span class="tag-badge" style="background:rgba(234,179,8,0.15); color:#eab308; border-color:#eab308;">SPONSORED BY ${article.sponsorName || 'PARTNER'}</span>` : ''}
         ${article.tags.map(t => `<span class="tag-badge" style="background:var(--bg-tertiary); color:var(--text-secondary); border-color:var(--border-color);">#${t}</span>`).join('')}
       </div>
       <h1 class="reader-title" id="reader-article-title">${article.title}</h1>
@@ -678,6 +685,17 @@ function openArticleReader(articleId: string) {
       ${highlightedContent}
     </div>
 
+    ${article.revisionHistory && article.revisionHistory.length > 0 ? `
+      <div style="margin: 1.5rem 0; padding: 1rem; background: var(--bg-tertiary); border-left: 3px solid var(--accent-cyan); border-radius: 4px; font-size: 0.8rem; color: var(--text-secondary);">
+        <strong style="color: var(--accent-cyan); display: block; margin-bottom: 0.4rem;">📝 ${preferences.language === 'en' ? 'Editorial Revision History' : 'Catatan Revisi & Update Redaksi'}</strong>
+        ${article.revisionHistory.map(rev => `
+          <div style="margin-top:0.25rem;">
+            <span style="font-family:var(--font-mono); color:var(--text-muted); font-size:0.75rem;">[${rev.date}]</span> ${rev.note}
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+
     <div class="reader-action-bar">
       <div style="display:flex; gap:0.75rem;">
         <button class="btn-action ${isLiked ? 'liked' : ''}" id="btn-like-article">
@@ -690,6 +708,23 @@ function openArticleReader(articleId: string) {
       <button class="btn-action" id="btn-share-article">
         <span>${t('shareBtn')}</span>
       </button>
+    </div>
+
+    <!-- Related Articles Slider Block -->
+    <div style="margin:2rem 0; padding:1.25rem; background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:var(--radius-md);">
+      <div style="font-size:0.75rem; font-weight:800; text-transform:uppercase; color:var(--accent-cyan); font-family:var(--font-mono); margin-bottom:1rem; letter-spacing:0.05em;">
+        ${preferences.language === 'en' ? 'RELATED STORIES • UP NEXT' : 'BERITA TERKAIT • SELANJUTNYA'}
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;" id="related-articles-container">
+        ${ARTICLES.filter(a => a.id !== article.id && (a.category === article.category || a.tags.some(t => article.tags.includes(t)))).slice(0, 3).map(rel => `
+          <div class="related-art-card" data-rel-id="${rel.id}" style="background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:8px; padding:0.85rem; cursor:pointer; transition:all 0.2s ease; display:flex; flex-direction:column; gap:0.5rem;" onmouseover="this.style.borderColor='var(--accent-cyan)'" onmouseout="this.style.borderColor='var(--border-color)'">
+            <img src="${rel.imageUrl}" alt="${rel.title}" style="width:100%; height:90px; border-radius:6px; object-fit:cover;" />
+            <span class="tag-badge" style="font-size:0.65rem; align-self:flex-start;">${rel.category.toUpperCase()}</span>
+            <h4 style="font-size:0.825rem; font-weight:700; color:var(--text-primary); line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${rel.title}</h4>
+            <span style="font-size:0.72rem; color:var(--text-muted);">${rel.readTimeMinutes}m ${preferences.language === 'en' ? 'read' : 'baca'}</span>
+          </div>
+        `).join('')}
+      </div>
     </div>
 
     <!-- Comments Section -->
@@ -717,6 +752,32 @@ function openArticleReader(articleId: string) {
 
   const contentWrapper = document.getElementById('article-content-wrapper');
   if (contentWrapper) TechGlossary.bindTermEvents(contentWrapper);
+
+  // Reading Progress Bar Scroll Handler
+  const progressBar = document.getElementById('reader-progress-bar');
+  if (progressBar && readerModal) {
+    const handleScroll = () => {
+      const scrollTop = readerModal.scrollTop;
+      const scrollHeight = readerModal.scrollHeight - readerModal.clientHeight;
+      if (scrollHeight > 0) {
+        const pct = Math.min(100, Math.max(0, (scrollTop / scrollHeight) * 100));
+        progressBar.style.width = `${pct}%`;
+      }
+    };
+    readerModal.addEventListener('scroll', handleScroll);
+  }
+
+  // Related Articles Click Handlers
+  modalReaderContent.querySelectorAll('.related-art-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const relId = card.getAttribute('data-rel-id');
+      if (relId) {
+        window.location.hash = `article/${relId}`;
+        openArticleReader(relId);
+        readerModal.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+  });
 
   // Apply dynamic translation if language is English
   if (preferences.language === 'en') {
@@ -1091,18 +1152,24 @@ function setupEventListeners() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
-  // Newsletter Submit Toast
-  newsletterForm?.addEventListener('submit', (e) => {
+  // Newsletter Submit
+  newsletterForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    Toast.show(t('alertSubscribe'));
+    const input = newsletterForm.querySelector('input[type="email"]') as HTMLInputElement;
+    const email = input?.value || '';
+    const responseMsg = await ApiService.subscribeNewsletter(email);
+    Toast.show(responseMsg || t('alertSubscribe'));
     (newsletterForm as HTMLFormElement).reset();
   });
 
   // Footer Newsletter Submit
   const footerNewsletterForm = document.getElementById('footer-newsletter-form');
-  footerNewsletterForm?.addEventListener('submit', (e) => {
+  footerNewsletterForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    Toast.show(t('alertSubscribe'));
+    const input = footerNewsletterForm.querySelector('input[type="email"]') as HTMLInputElement;
+    const email = input?.value || '';
+    const responseMsg = await ApiService.subscribeNewsletter(email);
+    Toast.show(responseMsg || t('alertSubscribe'));
     (footerNewsletterForm as HTMLFormElement).reset();
   });
 

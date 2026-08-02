@@ -58,6 +58,7 @@ func ConnectDB() (*gorm.DB, error) {
 		&models.Category{},
 		&models.Article{},
 		&models.TechIndex{},
+		&models.NewsletterSubscriber{},
 	)
 	if err != nil {
 		log.Printf("⚠️ AutoMigrate Error: %v", err)

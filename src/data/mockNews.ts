@@ -133,6 +133,10 @@ export const ARTICLES: Article[] = [
     isFeatured: true,
     isTrending: true,
     isBreaking: true,
+    isFactChecked: true,
+    revisionHistory: [
+      { date: '01 Ags 2026 10:15 WIB', note: 'Menambahkan rincian spesifikasi pendingin liquid cooling dari Kominfo.' }
+    ],
     viewsCount: 42800,
     likesCount: 3120,
     aiSummary: [

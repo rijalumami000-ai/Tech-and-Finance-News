@@ -28,6 +28,10 @@ export interface Article {
   isFeatured?: boolean;
   isTrending?: boolean;
   isBreaking?: boolean;
+  isFactChecked?: boolean;
+  isSponsored?: boolean;
+  sponsorName?: string;
+  revisionHistory?: Array<{ date: string; note: string }>;
   viewsCount: number;
   likesCount: number;
   aiSummary: string[]; // 3-4 bullet takeaways

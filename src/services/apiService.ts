@@ -98,4 +98,22 @@ export class ApiService {
     }
     return '';
   }
+
+  // Subscribe Email to Newsletter via Go Backend
+  public static async subscribeNewsletter(email: string): Promise<string> {
+    if (this.isBackendAvailable) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/newsletter/subscribe`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const json = await res.json();
+        if (json.message) return json.message;
+      } catch (err) {
+        console.warn('Newsletter subscription API failed.', err);
+      }
+    }
+    return '';
+  }
 }

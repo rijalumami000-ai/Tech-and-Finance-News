@@ -67,6 +67,13 @@ func main() {
 	api.Post("/ai/summarize", handlers.AISummarize)
 	api.Post("/ai/chat", handlers.ChatAI)
 
+	// Newsletter Subscription Endpoint
+	api.Post("/newsletter/subscribe", handlers.SubscribeNewsletter)
+
+	// Syndication & Aggregator RSS/JSON Feeds
+	app.Get("/rss.xml", handlers.GetRSSFeed)
+	app.Get("/feed.json", handlers.GetJSONFeed)
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"

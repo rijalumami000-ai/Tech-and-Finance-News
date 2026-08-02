@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"news-backend/database"
-	"news-backend/models"
+	"byteindonesia/backend/database"
+	"byteindonesia/backend/models"
 )
 
 type ChatRequest struct {
