@@ -9,6 +9,7 @@ import { SpecsComparator } from './components/SpecsComparator';
 import { CompanyModal, type CompanyPageType } from './components/CompanyModal';
 import { Toast } from './utils/toast';
 import { TranslationService, UI_TRANSLATIONS } from './utils/translationService';
+import { TextToSpeechService } from './utils/textToSpeech';
 import Lenis from 'lenis';
 
 // English Names for Categories
@@ -27,6 +28,7 @@ const CATEGORIES_EN: Record<string, string> = {
 let currentCategory: CategoryId = 'all';
 let searchQuery = '';
 let liveTechIndexes: TechIndexItem[] = [...TECH_INDEXES];
+let currentArticleSpeechText = '';
 
 const preferences: UserPreferences = {
   theme: (localStorage.getItem('byte_theme') as 'dark' | 'light') || 'dark',
@@ -569,6 +571,13 @@ function openArticleReader(articleId: string) {
   // Apply Auto Tech Glossary Highlights
   const highlightedContent = TechGlossary.highlightTermsInHTML(article.content);
 
+  // Prepare text & duration for Text-to-Speech Engine
+  const plainBody = TextToSpeechService.extractPlainTextFromHTML(highlightedContent);
+  const summaryText = article.aiSummary.join('. ');
+  currentArticleSpeechText = `${article.title}. ${article.subtitle}. ${summaryText}. ${plainBody}`;
+  const totalWords = currentArticleSpeechText.split(/\s+/).length;
+  const initialDurationStr = TextToSpeechService.formatTime(Math.ceil(totalWords / 2.2));
+
   modalReaderContent.innerHTML = `
     <div class="reader-header">
       <div class="badge-group">
@@ -593,9 +602,10 @@ function openArticleReader(articleId: string) {
       </div>
     </div>
 
-    <!-- AI Summary Box -->
+    <!-- Executive AI Summary Box -->
     <div class="ai-summary-box">
       <div class="ai-summary-header">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/></svg>
         ${t('aiSummaryHeader')}
       </div>
       <ul class="ai-summary-list" id="reader-ai-summary-list">
@@ -606,15 +616,18 @@ function openArticleReader(articleId: string) {
     <!-- Audio Player -->
     <div style="background:var(--bg-tertiary); padding:0.85rem 1.25rem; border-radius:var(--radius-md); border:1px solid var(--border-color); display:flex; align-items:center; justify-content:space-between; margin-bottom:2rem;">
       <div style="display:flex; align-items:center; gap:0.75rem;">
-        <button id="btn-audio-play" style="width:2.2rem; height:2.2rem; border-radius:50%; background:var(--accent-cyan); color:#000; font-weight:bold; display:flex; align-items:center; justify-content:center;">
+        <button id="btn-audio-play" style="width:2.4rem; height:2.4rem; border-radius:50%; background:var(--accent-cyan); color:#000; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; transition:all 0.2s ease;" title="Play / Pause Audio">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </button>
+        <button id="btn-audio-stop" style="width:2.0rem; height:2.0rem; border-radius:50%; background:rgba(255,255,255,0.08); color:var(--text-secondary); display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; transition:all 0.2s ease;" title="Stop Audio">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
         </button>
         <div>
           <div style="font-weight:700; font-size:0.85rem;">${t('audioNarrativeHeader')}</div>
           <div style="font-size:0.75rem; color:var(--text-muted);" id="audio-status-text">${t('audioNarrativeSub')}</div>
         </div>
       </div>
-      <span style="font-family:var(--font-mono); font-size:0.8rem; color:var(--text-muted);">02:45</span>
+      <span style="font-family:var(--font-mono); font-size:0.8rem; color:var(--text-muted);" id="audio-timer-text">00:00 / ${initialDurationStr}</span>
     </div>
 
     <img src="${article.imageUrl}" alt="${article.title}" class="reader-hero-image" />
@@ -754,15 +767,47 @@ function setupReaderControls(article: Article) {
     });
   }
 
-  // Audio Play Handler Mock
+  // Real Web Speech Synthesis Text-to-Speech Handler
   const audioBtn = document.getElementById('btn-audio-play');
+  const audioStopBtn = document.getElementById('btn-audio-stop');
   const audioStatusText = document.getElementById('audio-status-text');
-  let isPlaying = false;
-  if (audioBtn && audioStatusText) {
+  const audioTimerText = document.getElementById('audio-timer-text');
+
+  // Stop any previous speech instance when opening new article
+  TextToSpeechService.stop();
+
+  if (audioBtn && audioStatusText && audioTimerText) {
     audioBtn.addEventListener('click', () => {
-      isPlaying = !isPlaying;
-      audioBtn.innerHTML = isPlaying ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>` : `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
-      audioStatusText.textContent = isPlaying ? 'Memutar narasi suara AI (0:15 / 2:45)...' : 'Klik untuk memutar narasi suara sintetis';
+      if (TextToSpeechService.getIsPlaying()) {
+        TextToSpeechService.pause();
+      } else {
+        TextToSpeechService.play(currentArticleSpeechText, preferences.language, (state, curTime, durTime) => {
+          const curStr = TextToSpeechService.formatTime(curTime);
+          const durStr = TextToSpeechService.formatTime(durTime);
+
+          if (state === 'playing') {
+            audioBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
+            (audioBtn as HTMLElement).style.background = 'var(--accent-emerald)';
+            audioStatusText.textContent = t('audioPlaying');
+            audioTimerText.textContent = `${curStr} / ${durStr}`;
+          } else if (state === 'paused') {
+            audioBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+            (audioBtn as HTMLElement).style.background = 'var(--accent-cyan)';
+            audioStatusText.textContent = t('audioPaused');
+            audioTimerText.textContent = `${curStr} / ${durStr}`;
+          } else {
+            // stopped
+            audioBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+            (audioBtn as HTMLElement).style.background = 'var(--accent-cyan)';
+            audioStatusText.textContent = t('audioNarrativeSub');
+            audioTimerText.textContent = `00:00 / ${durStr}`;
+          }
+        });
+      }
+    });
+
+    audioStopBtn?.addEventListener('click', () => {
+      TextToSpeechService.stop();
     });
   }
 }
@@ -907,11 +952,17 @@ function setupEventListeners() {
     renderFeed();
   });
 
-  // Keyboard shortcut '/' to focus search
+  // Keyboard shortcut '/' to focus search & 'Escape' to close reader/audio
   window.addEventListener('keydown', (e) => {
     if (e.key === '/' && document.activeElement !== searchInput) {
       e.preventDefault();
       searchInput?.focus();
+    }
+    if (e.key === 'Escape' && readerModal?.classList.contains('open')) {
+      window.location.hash = '';
+      readerModal.classList.remove('open');
+      document.body.style.overflow = '';
+      TextToSpeechService.stop();
     }
   });
 
@@ -920,6 +971,7 @@ function setupEventListeners() {
     window.location.hash = '';
     readerModal?.classList.remove('open');
     document.body.style.overflow = '';
+    TextToSpeechService.stop();
   });
 
   bookmarksBtn?.addEventListener('click', renderBookmarksModal);
@@ -937,6 +989,7 @@ function setupEventListeners() {
       window.location.hash = '';
       readerModal.classList.remove('open');
       document.body.style.overflow = '';
+      TextToSpeechService.stop();
     }
   });
 
