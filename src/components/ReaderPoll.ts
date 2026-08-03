@@ -38,7 +38,7 @@ export class ReaderPoll {
     const totalVotes = this.options.reduce((sum, opt) => sum + opt.votes, 0);
 
     const question = lang === 'en' ? this.questionEn : this.questionId;
-    const widgetTitle = lang === 'en' ? '📊 EDITORIAL POLL' : '📊 JAJAK PENDAPAT REDAKSI';
+    const widgetTitle = lang === 'en' ? 'EDITORIAL POLL' : 'JAJAK PENDAPAT REDAKSI';
     const totalLabel = lang === 'en' ? `${totalVotes.toLocaleString('en-US')} total votes` : `${totalVotes.toLocaleString('id-ID')} total suara`;
     const votedNotice = lang === 'en' ? '✓ You have voted' : '✓ Terima kasih atas partisipasi Anda';
     const chooseText = lang === 'en' ? 'Vote →' : 'Pilih →';
@@ -46,7 +46,10 @@ export class ReaderPoll {
     return `
       <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; box-shadow: var(--shadow-md);">
         <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.6rem;">
-          <span style="font-size: 0.72rem; font-weight: 800; color: var(--accent-cyan); font-family: var(--font-mono); letter-spacing: 0.05em;">${widgetTitle}</span>
+          <span style="font-size: 0.72rem; font-weight: 800; color: var(--accent-cyan); font-family: var(--font-mono); letter-spacing: 0.06em; display:inline-flex; align-items:center; gap:0.4rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            ${widgetTitle}
+          </span>
           <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono);">${totalLabel}</span>
         </div>
 

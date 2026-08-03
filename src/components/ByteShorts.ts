@@ -113,13 +113,17 @@ export class ByteShorts {
   private static timerId: any = null;
 
   public static renderBarHTML(lang: 'id' | 'en'): string {
-    const sectionTitle = lang === 'en' ? '⚡ BYTESHORTS • VISUAL STORIES' : '⚡ BYTESHORTS • BERITA KILAT';
+    const sectionTitleText = lang === 'en' ? 'BYTESHORTS • VISUAL STORIES' : 'BYTESHORTS • BERITA KILAT';
+    const clickHintText = lang === 'en' ? 'Click story to preview →' : 'Klik story untuk pratinjau →';
 
     return `
       <div style="margin: 1.25rem 0 0.5rem 0; padding: 0.85rem 1rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
-        <div style="font-size: 0.72rem; font-weight: 800; color: var(--accent-cyan); font-family: var(--font-mono); letter-spacing: 0.05em; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
-          <span>${sectionTitle}</span>
-          <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600;">Klik Story Untuk Pratinjau →</span>
+        <div style="font-size: 0.72rem; font-weight: 800; color: var(--accent-cyan); font-family: var(--font-mono); letter-spacing: 0.06em; margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;">
+          <span style="display:inline-flex; align-items:center; gap:0.4rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            ${sectionTitleText}
+          </span>
+          <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600;">${clickHintText}</span>
         </div>
 
         <div style="display: flex; gap: 1.25rem; overflow-x: auto; padding-bottom: 0.35rem; scrollbar-width: none;">
