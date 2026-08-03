@@ -916,7 +916,7 @@ function setupReaderControls(article: Article) {
           if (state === 'playing') {
             audioBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
             (audioBtn as HTMLElement).style.background = 'var(--accent-emerald)';
-            audioStatusText.textContent = t('audioPlaying');
+            audioStatusText.innerHTML = `<span style="display:inline-flex; align-items:center;">${t('audioPlaying')}<span class="audio-equalizer"><span class="equalizer-bar"></span><span class="equalizer-bar"></span><span class="equalizer-bar"></span><span class="equalizer-bar"></span></span></span>`;
             audioTimerText.textContent = `${curStr} / ${durStr}`;
           } else if (state === 'paused') {
             audioBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
@@ -961,10 +961,24 @@ function renderBookmarksModal() {
 
   if (savedArticles.length === 0) {
     bookmarksListContainer.innerHTML = `
-      <div style="text-align: center; padding: 2rem 0; color: var(--text-muted);">
-        <p>${preferences.language === 'en' ? 'No saved articles yet.' : 'Belum ada artikel yang Anda simpan.'}</p>
+      <div style="text-align: center; padding: 3rem 1.5rem; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+        <div style="width: 52px; height: 52px; border-radius: 50%; background: var(--bg-tertiary); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+        </div>
+        <div>
+          <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin: 0 0 0.35rem 0;">${preferences.language === 'en' ? 'No Bookmarked Articles' : 'Belum Ada Artikel Tersimpan'}</h4>
+          <p style="font-size: 0.825rem; color: var(--text-muted); margin: 0; line-height: 1.5; max-width: 260px;">${preferences.language === 'en' ? 'Save interesting tech stories to read offline anytime.' : 'Simpan artikel berita menarik untuk dibaca kapan saja.'}</p>
+        </div>
+        <button id="btn-explore-bookmarks" style="padding: 0.5rem 1.25rem; background: var(--gradient-brand); color: #000; font-weight: 800; font-size: 0.8rem; border-radius: var(--radius-full); border: none; cursor: pointer;">
+          ${preferences.language === 'en' ? 'Explore Trending Stories →' : 'Eksplor Berita Terbaru →'}
+        </button>
       </div>
     `;
+
+    bookmarksListContainer.querySelector('#btn-explore-bookmarks')?.addEventListener('click', () => {
+      if (bookmarksModal) bookmarksModal.classList.remove('open');
+      document.getElementById('news-feed-heading')?.scrollIntoView({ behavior: 'smooth' });
+    });
   } else {
     bookmarksListContainer.innerHTML = savedArticles.map(art => `
       <div style="display: flex; gap: 1rem; padding: 0.85rem 0; border-bottom: 1px solid var(--border-color); align-items: center;">
@@ -973,7 +987,7 @@ function renderBookmarksModal() {
           <h4 style="font-size: 0.875rem; font-weight: 700; cursor: pointer;" onclick="window.openArticleReaderFromOutside('${art.id}')">${art.title}</h4>
           <span style="font-size: 0.75rem; color: var(--text-muted);">${art.category} • ${art.readTimeMinutes}m ${preferences.language === 'en' ? 'read' : 'baca'}</span>
         </div>
-        <button style="color: var(--accent-rose); font-size: 0.8rem;" onclick="window.removeBookmarkFromOutside('${art.id}')">${preferences.language === 'en' ? 'Remove' : 'Hapus'}</button>
+        <button style="color: var(--accent-rose); font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none; background: none;" onclick="window.removeBookmarkFromOutside('${art.id}')">${preferences.language === 'en' ? 'Remove' : 'Hapus'}</button>
       </div>
     `).join('');
   }
@@ -1122,17 +1136,30 @@ function setupEventListeners() {
     renderFeed();
   });
 
-  // Keyboard shortcut '/' to focus search & 'Escape' to close reader/audio
+  // Global Keyboard Shortcuts (ESC to close any modal, '/' or 'Ctrl+K'/'Cmd+K' to focus search)
   window.addEventListener('keydown', (e) => {
-    if (e.key === '/' && document.activeElement !== searchInput) {
+    const isTyping = document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA';
+
+    if ((e.key === '/' || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k')) && !isTyping) {
       e.preventDefault();
       searchInput?.focus();
     }
-    if (e.key === 'Escape' && readerModal?.classList.contains('open')) {
-      window.location.hash = '';
-      readerModal.classList.remove('open');
-      document.body.style.overflow = '';
-      TextToSpeechService.stop();
+
+    if (e.key === 'Escape') {
+      if (readerModal?.classList.contains('open')) {
+        window.location.hash = '';
+        readerModal.classList.remove('open');
+        document.body.style.overflow = '';
+        TextToSpeechService.stop();
+      }
+      if (bookmarksModal?.classList.contains('open')) bookmarksModal.classList.remove('open');
+      if (glossaryModal?.classList.contains('open')) glossaryModal.classList.remove('open');
+      if (specsModal?.classList.contains('open')) specsModal.classList.remove('open');
+      if (adminCmsModal?.classList.contains('open')) {
+        window.location.hash = '';
+        adminCmsModal.classList.remove('open');
+        document.body.style.overflow = '';
+      }
     }
   });
 
