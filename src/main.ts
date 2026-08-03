@@ -39,7 +39,7 @@ const preferences: UserPreferences = {
   theme: (localStorage.getItem('byte_theme') as 'dark' | 'light') || 'dark',
   savedArticleIds: JSON.parse(localStorage.getItem('byte_bookmarks') || '[]'),
   likedArticleIds: JSON.parse(localStorage.getItem('byte_likes') || '[]'),
-  fontSize: 'normal',
+  fontSize: (localStorage.getItem('byte_font_size') as 'normal' | 'large' | 'xlarge') || 'normal',
   language: (localStorage.getItem('byte_lang') as 'id' | 'en') || 'id'
 };
 
@@ -672,8 +672,8 @@ function openArticleReader(articleId: string) {
       </ul>
     </div>
 
-    <!-- Audio Player -->
-    <div style="background:var(--bg-tertiary); padding:0.85rem 1.25rem; border-radius:var(--radius-md); border:1px solid var(--border-color); display:flex; align-items:center; justify-content:space-between; margin-bottom:2rem;">
+    <!-- Audio Player & Text Size Toolbar -->
+    <div style="background:var(--bg-tertiary); padding:0.85rem 1.25rem; border-radius:var(--radius-md); border:1px solid var(--border-color); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
       <div style="display:flex; align-items:center; gap:0.75rem;">
         <button id="btn-audio-play" style="width:2.4rem; height:2.4rem; border-radius:50%; background:var(--accent-cyan); color:#000; font-weight:bold; display:flex; align-items:center; justify-content:center; cursor:pointer; border:none; transition:all 0.2s ease;" title="Play / Pause Audio">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -686,7 +686,20 @@ function openArticleReader(articleId: string) {
           <div style="font-size:0.75rem; color:var(--text-muted);" id="audio-status-text">${t('audioNarrativeSub')}</div>
         </div>
       </div>
-      <span style="font-family:var(--font-mono); font-size:0.8rem; color:var(--text-muted);" id="audio-timer-text">00:00 / ${initialDurationStr}</span>
+
+      <div style="display:flex; align-items:center; gap:1rem;">
+        <span style="font-family:var(--font-mono); font-size:0.78rem; color:var(--text-muted);" id="audio-timer-text">00:00 / ${initialDurationStr}</span>
+        
+        <!-- Text Size Control Toggle -->
+        <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem; font-family: var(--font-mono);">
+          <span>${t('fontSizeLabel')}</span>
+          <div class="font-size-toggle">
+            <button class="btn-size ${!preferences.fontSize || preferences.fontSize === 'normal' ? 'active' : ''}" data-size="normal">A</button>
+            <button class="btn-size ${preferences.fontSize === 'large' ? 'active' : ''}" data-size="large">A+</button>
+            <button class="btn-size ${preferences.fontSize === 'xlarge' ? 'active' : ''}" data-size="xlarge">A++</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <img src="${article.imageUrl}" alt="${article.title}" class="reader-hero-image" />
@@ -822,6 +835,7 @@ function setupReaderControls(article: Article) {
       target.classList.add('active');
       const size = target.getAttribute('data-size') as 'normal' | 'large' | 'xlarge';
       preferences.fontSize = size;
+      localStorage.setItem('byte_font_size', size);
       
       if (contentWrapper) {
         contentWrapper.className = `article-rich-content ${size === 'large' ? 'size-large' : size === 'xlarge' ? 'size-xlarge' : ''}`;
