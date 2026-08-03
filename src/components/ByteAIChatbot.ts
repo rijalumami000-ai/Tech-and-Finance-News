@@ -13,26 +13,27 @@ export class ByteAIChatbot {
   public renderChatbotHTML(): string {
     return `
       <!-- Floating Trigger Button -->
-      <button id="byte-ai-trigger-btn" style="position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 990; padding: 0.75rem 1.25rem; background: var(--gradient-brand); color: #000; font-weight: 800; border-radius: var(--radius-full); box-shadow: var(--shadow-lg), var(--shadow-glow); display: flex; align-items: center; gap: 0.6rem; cursor: pointer; border: none; font-size: 0.875rem;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        <span>Tanya ByteAI</span>
+      <button id="byte-ai-trigger-btn" style="position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 990; padding: 0.65rem 1.15rem; background: var(--bg-tertiary); color: var(--text-primary); font-weight: 700; border-radius: var(--radius-full); border: 1px solid var(--border-active); box-shadow: var(--shadow-md); display: flex; align-items: center; gap: 0.55rem; cursor: pointer; font-size: 0.825rem; transition: transform 0.2s ease, border-color 0.2s ease;">
+        <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent-cyan);"></div>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span>ByteResearch Copilot</span>
       </button>
 
       <!-- Chat Window Widget -->
-      <div id="byte-ai-window" style="position: fixed; bottom: 5rem; right: 1.5rem; z-index: 999; width: 380px; max-width: calc(100vw - 2rem); height: 520px; max-height: calc(100vh - 7rem); background: var(--bg-secondary); border: 1px solid var(--border-active); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); display: ${this.isOpen ? 'flex' : 'none'}; flex-direction: column; overflow: hidden; backdrop-filter: blur(16px);">
+      <div id="byte-ai-window" style="position: fixed; bottom: 4.8rem; right: 1.5rem; z-index: 999; width: 380px; max-width: calc(100vw - 2rem); height: 520px; max-height: calc(100vh - 7rem); background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); display: ${this.isOpen ? 'flex' : 'none'}; flex-direction: column; overflow: hidden; backdrop-filter: blur(16px);">
         
         <!-- Header -->
-        <div style="padding: 1rem 1.25rem; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
+        <div style="padding: 0.85rem 1.15rem; background: var(--bg-tertiary); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between;">
           <div style="display: flex; align-items: center; gap: 0.6rem;">
-            <div style="width: 2rem; height: 2rem; background: var(--gradient-brand); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <div style="width: 1.85rem; height: 1.85rem; background: rgba(6, 182, 212, 0.12); border: 1px solid var(--accent-cyan); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--accent-cyan);">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             </div>
             <div>
-              <h4 style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary);">ByteAI Assistant</h4>
-              <span style="font-size: 0.75rem; color: var(--accent-cyan); font-family: var(--font-mono);">Kecerdasan Buatan Terintegrasi</span>
+              <h4 style="font-weight: 800; font-size: 0.88rem; color: var(--text-primary); margin: 0;">ByteResearch Copilot</h4>
+              <span style="font-size: 0.68rem; color: var(--text-muted); font-family: var(--font-mono);">RAG Neural Assistant • RAG-v2.4</span>
             </div>
           </div>
-          <button id="byte-ai-close-btn" style="color: var(--text-muted); font-size: 1.2rem; cursor: pointer; border: none; background: none;">✕</button>
+          <button id="byte-ai-close-btn" style="color: var(--text-muted); font-size: 1.1rem; cursor: pointer; border: none; background: none; transition: color 0.2s;">✕</button>
         </div>
 
         <!-- Suggestion Chips Bar -->

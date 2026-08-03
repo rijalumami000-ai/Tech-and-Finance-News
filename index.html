@@ -277,22 +277,19 @@
           </div>
 
           <div>
-            <!-- Avatar & Subscription container -->
-            <div class="footer-sub-container" style="position: relative; padding-top: 100px; display: flex; flex-direction: column; gap: 0.75rem; align-items: flex-start;">
-              <!-- Premium 3D style character image pointing down -->
-              <img src="/premium_3d_avatar.png" class="footer-avatar-img" alt="ByteAI 3D Character" style="position: absolute; top: -50px; left: 50%; width: 170px; height: 150px; object-fit: contain; transform: translateX(-50%);" />
-
+            <!-- Subscription container -->
+            <div class="footer-sub-container" style="display: flex; flex-direction: column; gap: 0.75rem; align-items: flex-start;">
+              <h4 class="footer-links-title" style="color: var(--text-primary); font-weight: 800; margin-bottom: 0.5rem; font-size: 0.95rem;">Newsletter Redaksi</h4>
+              <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45; max-width: 260px; margin-bottom: 0.5rem;">
+                Dapatkan rangkuman berita eksekutif & wawasan AI harian langsung ke email Anda.
+              </p>
               <!-- Subscription bar -->
-              <form class="footer-subscribe-bar" id="footer-newsletter-form" style="display: flex; background: #fff; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; width: 100%; max-width: 320px; box-shadow: 0 4px 10px rgba(0,0,0,0.04);">
-                <input type="email" class="footer-subscribe-input" placeholder="Your Email" required style="flex: 1; border: none; background: transparent; padding: 0 1rem; font-size: 0.85rem; outline: none; height: 2.8rem;" />
-                <button type="submit" class="footer-subscribe-btn" style="width: 3.2rem; height: 2.8rem; background: #FFE082; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-                  <!-- Blue paper plane SVG -->
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1565C0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              <form class="footer-subscribe-bar" id="footer-newsletter-form" style="display: flex; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; width: 100%; max-width: 320px;">
+                <input type="email" class="footer-subscribe-input" placeholder="Alamat email Anda..." required style="flex: 1; border: none; background: transparent; padding: 0 0.85rem; font-size: 0.825rem; outline: none; height: 2.6rem; color: var(--text-primary);" />
+                <button type="submit" class="footer-subscribe-btn" style="padding: 0 1rem; height: 2.6rem; background: var(--gradient-brand); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #000; font-weight: 800; font-size: 0.8rem;">
+                  Langganan
                 </button>
               </form>
-              <p style="font-size: 0.8rem; color: #666; line-height: 1.4; max-width: 240px; margin-top: 0.25rem;">
-                Subscribe us and get all the benefits from today.
-              </p>
             </div>
           </div>
         </div>
