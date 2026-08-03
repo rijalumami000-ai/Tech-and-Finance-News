@@ -1140,33 +1140,37 @@ button {
   font-style: italic;
 }
 
-/* Article Content Typography */
+/* Article Content Typography & Proportional Resizing */
 .article-rich-content {
-  font-size: 1.05rem;
+  font-size: 1rem;
   line-height: 1.75;
   color: var(--text-primary);
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  transition: font-size 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.article-rich-content.size-large { font-size: 1.15rem; }
-.article-rich-content.size-xlarge { font-size: 1.25rem; }
+.article-rich-content p {
+  font-size: 1em;
+  line-height: 1.75;
+}
 
 .article-rich-content p.lead {
-  font-size: 1.2rem;
-  font-weight: 500;
+  font-size: 1.15em;
+  font-weight: 600;
   color: var(--text-primary);
 }
 
 .article-rich-content h3 {
-  font-size: 1.4rem;
+  font-size: 1.35em;
   font-weight: 800;
   margin-top: 1.5rem;
   color: var(--accent-cyan);
 }
 
 .article-rich-content blockquote {
+  font-size: 1.05em;
   border-left: 4px solid var(--accent-cyan);
   padding: 1rem 1.25rem;
   background: var(--bg-tertiary);
@@ -1174,6 +1178,11 @@ button {
   font-style: italic;
   margin: 1rem 0;
 }
+
+/* Scaled Font Size Multipliers */
+.article-rich-content.size-normal { font-size: 1rem !important; }
+.article-rich-content.size-large { font-size: 1.22rem !important; }
+.article-rich-content.size-xlarge { font-size: 1.45rem !important; }
 
 .article-rich-content blockquote cite {
   display: block;

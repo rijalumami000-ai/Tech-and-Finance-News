@@ -705,7 +705,7 @@ function openArticleReader(articleId: string) {
     <img src="${article.imageUrl}" alt="${article.title}" class="reader-hero-image" />
     ${article.imageCaption ? `<div class="image-caption">${article.imageCaption}</div>` : ''}
 
-    <div class="article-rich-content ${preferences.fontSize === 'large' ? 'size-large' : preferences.fontSize === 'xlarge' ? 'size-xlarge' : ''}" id="article-content-wrapper">
+    <div class="article-rich-content size-${preferences.fontSize || 'normal'}" id="article-content-wrapper">
       ${highlightedContent}
     </div>
 
@@ -825,11 +825,11 @@ function openArticleReader(articleId: string) {
 
 // Setup Reader Internal Controls
 function setupReaderControls(article: Article) {
-  const contentWrapper = document.getElementById('article-content-wrapper');
   const sizeBtns = document.querySelectorAll('.font-size-toggle .btn-size');
 
   sizeBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
+      e.preventDefault();
       sizeBtns.forEach(b => b.classList.remove('active'));
       const target = e.currentTarget as HTMLElement;
       target.classList.add('active');
@@ -837,8 +837,9 @@ function setupReaderControls(article: Article) {
       preferences.fontSize = size;
       localStorage.setItem('byte_font_size', size);
       
-      if (contentWrapper) {
-        contentWrapper.className = `article-rich-content ${size === 'large' ? 'size-large' : size === 'xlarge' ? 'size-xlarge' : ''}`;
+      const wrapper = document.getElementById('article-content-wrapper');
+      if (wrapper) {
+        wrapper.className = `article-rich-content size-${size}`;
       }
     });
   });
